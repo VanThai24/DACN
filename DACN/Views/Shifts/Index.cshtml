@@ -1,0 +1,38 @@
+@model IEnumerable<Models.ShiftViewModel>
+@{
+    ViewBag.Title = "Danh sách ca làm";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white">
+                <h2 class="mb-0">Danh sách ca làm</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nhân viên</th>
+                            <th>Ngày</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model)
+                        {
+                            <tr>
+                                <td>@s.Id</td>
+                                <td>@s.EmployeeName</td>
+                                <td>@(s.Date?.ToString("dd/MM/yyyy"))</td>
+                                <td>@(s.StartTime.HasValue ? s.StartTime.Value.ToString(@"hh\:mm") : "")</td>
+                                <td>@(s.EndTime.HasValue ? s.EndTime.Value.ToString(@"hh\:mm") : "")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

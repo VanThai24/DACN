@@ -1,0 +1,38 @@
+@model IEnumerable<Models.Device>
+@{
+    ViewBag.Title = "Danh sách thiết bị";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h2 class="mb-0">Danh sách thiết bị</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Vị trí</th>
+                            <th>API Key</th>
+                            <th>Last Seen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in Model)
+                        {
+                            <tr>
+                                <td>@d.Id</td>
+                                <td>@d.Name</td>
+                                <td>@d.Location</td>
+                                <td>@d.ApiKey</td>
+                                <td>@(d.LastSeen?.ToString("dd/MM/yyyy HH:mm"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

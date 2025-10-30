@@ -1,0 +1,150 @@
+@{
+    ViewBag.Title = "Quản lý khuôn mặt";
+}
+<h2>Quản lý khuôn mặt</h2>
+<div>
+    <button id="btnReload" class="btn btn-primary">Tải lại danh sách</button>
+    <button id="btnAdd" class="btn btn-success">Thêm khuôn mặt mới</button>
+</div>
+<br />
+<table class="table table-bordered" id="facesTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<!-- Modal thêm/sửa -->
+<div class="modal fade" id="faceModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Thêm/Sửa khuôn mặt</h5>
+    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="faceForm">
+          <input type="hidden" id="faceId" />
+          <div class="form-group">
+            <label for="faceName">Tên</label>
+            <input type="text" class="form-control" id="faceName" required />
+          </div>
+          <div class="form-group" id="imageGroup">
+            <label for="faceImage">Ảnh khuôn mặt</label>
+            <input type="file" class="form-control" id="faceImage" accept="image/*" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" id="btnSave">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+const API_URL = 'http://localhost:5000'; // Đổi lại nếu AI Flask chạy port khác
+
+function loadFaces() {
+    $.get(API_URL + '/faces', function(res) {
+        if (res.success) {
+            let html = '';
+            res.faces.forEach(face => {
+                html += `<tr>
+                    <td>${face.id}</td>
+                    <td>${face.name}</td>
+                    <td>
+                        <button class='btn btn-sm btn-info' onclick='editFace(${face.id}, "${face.name}")'>Sửa</button>
+                        <button class='btn btn-sm btn-danger' onclick='deleteFace(${face.id})'>Xóa</button>
+                    </td>
+                </tr>`;
+            });
+            $('#facesTable tbody').html(html);
+        }
+    });
+}
+
+function editFace(id, name) {
+    $('#modalTitle').text('Sửa khuôn mặt');
+    $('#faceId').val(id);
+    $('#faceName').val(name);
+    $('#imageGroup').hide();
+    $('#faceModal').modal('show');
+}
+
+function deleteFace(id) {
+    if (confirm('Bạn chắc chắn muốn xóa?')) {
+        $.ajax({
+            url: API_URL + '/delete_face',
+            type: 'DELETE',
+            contentType: 'application/json',
+            data: JSON.stringify({ id }),
+            success: function(res) {
+                alert(res.message);
+                loadFaces();
+            }
+        });
+    }
+}
+
+$('#btnAdd').click(function() {
+    $('#modalTitle').text('Thêm khuôn mặt mới');
+    $('#faceId').val('');
+    $('#faceName').val('');
+    $('#faceImage').val('');
+    $('#imageGroup').show();
+    $('#faceModal').modal('show');
+});
+
+$('#btnReload').click(loadFaces);
+
+$('#btnSave').click(function() {
+    const id = $('#faceId').val();
+    const name = $('#faceName').val();
+    if (id) {
+        // Sửa tên
+        $.ajax({
+            url: API_URL + '/update_face',
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify({ id, name }),
+            success: function(res) {
+                alert(res.message);
+                $('#faceModal').modal('hide');
+                loadFaces();
+            }
+        });
+    } else {
+        // Thêm mới
+        const file = $('#faceImage')[0].files[0];
+        if (!file) { alert('Vui lòng chọn ảnh!'); return; }
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('image', file);
+        $.ajax({
+            url: API_URL + '/add_face',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                alert(res.message);
+                $('#faceModal').modal('hide');
+                loadFaces();
+            }
+        });
+    }
+});
+
+$(document).ready(loadFaces);
+</script>
+}

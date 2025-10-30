@@ -1,0 +1,31 @@
+@model Models.Employee
+@{
+    ViewBag.Title = "Xóa nhân viên";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0">Xóa nhân viên</h2>
+            </div>
+            <div class="card-body">
+                <p>Bạn có chắc muốn xóa nhân viên <strong>@Model.Name</strong>?</p>
+                <p>Trạng thái: <b>@(Model.IsLocked ? "Đã khóa" : "Đang hoạt động")</b></p>
+                @if (Model.IsLocked)
+                {
+                    <a href="/Employees/Unlock/@Model.Id" class="btn btn-secondary mb-2">Mở khóa</a>
+                }
+                else
+                {
+                    <a href="/Employees/Lock/@Model.Id" class="btn btn-dark mb-2">Khóa</a>
+                }
+                <form method="post">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+                <a href="/Employees" class="btn btn-link mt-2">Quay lại danh sách</a>
+            </div>
+        </div>
+    </div>
+</div>

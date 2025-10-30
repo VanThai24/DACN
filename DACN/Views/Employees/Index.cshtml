@@ -1,0 +1,61 @@
+@model IEnumerable<Models.Employee>
+@{
+    ViewBag.Title = "Danh sách nhân viên";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+}
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger text-center">@ViewBag.ErrorMessage</div>
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Danh sách nhân viên</h2>
+                <a href="/Employees/Create" class="btn btn-light">Thêm nhân viên</a>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Phòng ban</th>
+                            <th>Vai trò</th>
+                            <th>Face Embedding</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var emp in Model)
+                        {
+                            <tr>
+                                <td>@emp.Id</td>
+                                <td>@emp.Name</td>
+                                <td>@emp.Department</td>
+                                <td>@emp.Role</td>
+                                <td>@emp.FaceEmbedding</td>
+                                <td>
+                                    <a href="/Employees/Details/@emp.Id" class="btn btn-sm btn-info">Xem</a>
+                                    <a href="/Employees/Edit/@emp.Id" class="btn btn-sm btn-warning">Sửa</a>
+                                    <a href="/Employees/Delete/@emp.Id" class="btn btn-sm btn-danger">Xóa</a>
+                                    @if (emp.IsLocked)
+                                    {
+                                        <a href="/Employees/Unlock/@emp.Id" class="btn btn-sm btn-secondary">Mở khóa</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="/Employees/Lock/@emp.Id" class="btn btn-sm btn-dark">Khóa</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

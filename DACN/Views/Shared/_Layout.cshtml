@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AdminWeb</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
+</head>
+<body style="background: #f4f6fb; min-height: 100vh;">
+    <partial name="_Navbar" />
+    <div class="container py-4">
+        @RenderBody()
+    </div>
+    <footer class="border-top footer text-muted mt-4 shadow-sm rounded-pill bg-white px-4 py-2" style="max-width: 700px; margin: 0 auto 24px auto;">
+        <div class="container text-center">
+            &copy; 2025 - AdminWeb
+        </div>
+    </footer>
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

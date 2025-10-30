@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.4.9",
+    "react-native-linear-gradient": "^2.8.3"
+  }
+}

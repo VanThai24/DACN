@@ -1,0 +1,35 @@
+@model Models.Employee
+@{
+    ViewBag.Title = "Chi tiết nhân viên";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h2 class="mb-0">Chi tiết nhân viên</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item"><b>ID:</b> @Model.Id</li>
+                    <li class="list-group-item"><b>Tên:</b> @Model.Name</li>
+                    <li class="list-group-item"><b>Phòng ban:</b> @Model.Department</li>
+                    <li class="list-group-item"><b>Vai trò:</b> @Model.Role</li>
+                    <li class="list-group-item"><b>Face Embedding:</b> @Model.FaceEmbedding</li>
+                    <li class="list-group-item"><b>Trạng thái:</b> <span class="fw-bold">@(Model.IsLocked ? "Đã khóa" : "Đang hoạt động")</span></li>
+                </ul>
+                <a href="/Employees/Edit/@Model.Id" class="btn btn-warning me-2">Sửa</a>
+                <a href="/Employees/Delete/@Model.Id" class="btn btn-danger me-2">Xóa</a>
+                @if (Model.IsLocked)
+                {
+                    <a href="/Employees/Unlock/@Model.Id" class="btn btn-secondary me-2">Mở khóa</a>
+                }
+                else
+                {
+                    <a href="/Employees/Lock/@Model.Id" class="btn btn-dark me-2">Khóa</a>
+                }
+                <a href="/Employees" class="btn btn-link">Quay lại danh sách</a>
+            </div>
+        </div>
+    </div>
+</div>

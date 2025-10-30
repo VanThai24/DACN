@@ -1,0 +1,49 @@
+@model Models.Employee
+@{
+    ViewBag.Title = "Sửa nhân viên";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="mb-0">Sửa nhân viên</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label">Tên:</label>
+                        <input type="text" name="Name" value="@Model.Name" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phòng ban:</label>
+                        <input type="text" name="Department" value="@Model.Department" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vai trò:</label>
+                        <input type="text" name="Role" value="@Model.Role" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Face Embedding:</label>
+                        <input type="text" name="FaceEmbedding" value="@Model.FaceEmbedding" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái:</label>
+                        <span class="fw-bold">@(Model.IsLocked ? "Đã khóa" : "Đang hoạt động")</span>
+                        @if (Model.IsLocked)
+                        {
+                            <a href="/Employees/Unlock/@Model.Id" class="btn btn-secondary ms-2">Mở khóa</a>
+                        }
+                        else
+                        {
+                            <a href="/Employees/Lock/@Model.Id" class="btn btn-dark ms-2">Khóa</a>
+                        }
+                    </div>
+                    <button type="submit" class="btn btn-success">Lưu</button>
+                </form>
+                <a href="/Employees" class="btn btn-link mt-2">Quay lại danh sách</a>
+            </div>
+        </div>
+    </div>
+</div>

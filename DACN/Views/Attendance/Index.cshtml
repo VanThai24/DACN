@@ -1,0 +1,42 @@
+@model IEnumerable<Models.AttendanceRecordViewModel>
+@{
+    ViewBag.Title = "Danh sách điểm danh";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="mb-0">Danh sách điểm danh</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nhân viên</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Status</th>
+                            <th>Photo</th>
+                            <th>Device</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model)
+                        {
+                            <tr>
+                                <td>@r.Id</td>
+                                <td>@r.EmployeeName</td>
+                                <td>@(r.TimestampIn?.ToString("dd/MM/yyyy HH:mm"))</td>
+                                <td>@(r.TimestampOut?.ToString("dd/MM/yyyy HH:mm"))</td>
+                                <td>@r.Status</td>
+                                <td>@r.PhotoPath</td>
+                                <td>@r.DeviceId</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

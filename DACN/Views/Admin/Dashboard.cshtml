@@ -1,0 +1,19 @@
+@{
+    ViewBag.Title = "Dashboard";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Dashboard</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Tổng số nhân viên: <strong>@ViewBag.EmployeeCount</strong></li>
+                    <li class="list-group-item">Tổng số điểm danh: <strong>@ViewBag.AttendanceCount</strong></li>
+                    <li class="list-group-item">Tổng số báo cáo: <strong>@ViewBag.ReportCount</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
