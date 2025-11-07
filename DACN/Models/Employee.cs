@@ -13,6 +13,9 @@ namespace Models
         public string Role { get; set; } = "employee";
     [Column("phone")]
     public string? Phone { get; set; }
+
+    [Column("email")]
+    public string? Email { get; set; }
         [Column("face_embedding")]
         public byte[]? FaceEmbedding { get; set; }
 

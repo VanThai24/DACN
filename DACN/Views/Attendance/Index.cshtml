@@ -1,4 +1,4 @@
-@model IEnumerable<Models.AttendanceRecordViewModel>
+đ@model IEnumerable<Models.AttendanceRecordViewModel>
 @{
     ViewBag.Title = "Danh sách điểm danh";
 }
@@ -28,7 +28,7 @@
                                 <td>@r.Id</td>
                                 <td>@r.EmployeeName</td>
                                 <td>@(r.TimestampIn?.ToString("dd/MM/yyyy HH:mm"))</td>
-                                <td>@(r.TimestampOut?.ToString("dd/MM/yyyy HH:mm"))</td>
+                                <!-- Đã xóa thuộc tính TimestampOut khỏi model, bỏ cột này -->
                                 <td>@r.Status</td>
                                 <td>@r.PhotoPath</td>
                                 <td>@r.DeviceId</td>

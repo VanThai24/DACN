@@ -14,8 +14,7 @@ namespace Models
     public int EmployeeId { get; set; }
     [Column("timestamp_in")]
     public DateTime? TimestampIn { get; set; }
-    [Column("timestamp_out")]
-    public DateTime? TimestampOut { get; set; }
+    // Đã xóa cột timestamp_out khỏi database, loại bỏ property này
     public string? Status { get; set; }
     [Column("photo_path")]
     public string? PhotoPath { get; set; }

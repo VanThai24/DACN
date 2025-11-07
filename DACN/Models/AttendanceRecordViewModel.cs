@@ -6,7 +6,7 @@ namespace Models
         public int Id { get; set; }
         public string? EmployeeName { get; set; }
         public DateTime? TimestampIn { get; set; }
-        public DateTime? TimestampOut { get; set; }
+    // Đã xóa cột timestamp_out khỏi database, loại bỏ property này
         public string? Status { get; set; }
         public string? PhotoPath { get; set; }
         public int DeviceId { get; set; }

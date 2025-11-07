@@ -86,15 +86,34 @@ class FaceIDApp(QWidget):
                     (x, y, w, h) = faces[0]
                     face_img = rgb_frame[y:y+h, x:x+w]
                     try:
-                        # Tiền xử lý ảnh khuôn mặt
-                        face_resized = cv2.resize(face_img, (128, 128))
-                        face_array = img_to_array(face_resized) / 255.0
-                        face_array = np.expand_dims(face_array, axis=0)
-                        # Dự đoán bằng model TensorFlow
-                        preds = model.predict(face_array)
-                        pred_idx = np.argmax(preds, axis=1)[0]
-                        confidence = preds[0][pred_idx]
-                        threshold = 0.8  # Ngưỡng xác suất, có thể điều chỉnh
+                        # Tiền xử lý ảnh khuôn mặt - cắt thành 3 vùng: mắt, mũi, miệng
+                        h1 = int(h * 0.35)  # vùng mắt (trên)
+                        h2 = int(h * 0.65)  # vùng mũi (giữa)
+                        # Vùng mắt
+                        eye_img = face_img[0:h1, :]
+                        # Vùng mũi
+                        nose_img = face_img[h1:h2, :]
+                        # Vùng miệng
+                        mouth_img = face_img[h2:h, :]
+                        regions = [face_img, eye_img, nose_img, mouth_img]
+                        preds_list = []
+                        for region in regions:
+                            if region.shape[0] < 10 or region.shape[1] < 10:
+                                continue
+                            region_resized = cv2.resize(region, (128, 128))
+                            region_array = img_to_array(region_resized) / 255.0
+                            region_array = np.expand_dims(region_array, axis=0)
+                            preds = model.predict(region_array)
+                            preds_list.append(preds[0])
+                        if not preds_list:
+                            self.label.setText("Không nhận diện được khuôn mặt (ảnh quá nhỏ hoặc lỗi cắt vùng)")
+                            scanned = True
+                            return
+                        # Trung bình xác suất các vùng
+                        avg_preds = np.mean(preds_list, axis=0)
+                        pred_idx = np.argmax(avg_preds)
+                        confidence = avg_preds[pred_idx]
+                        threshold = 0.6  # Ngưỡng xác suất, có thể điều chỉnh
                         if confidence >= threshold and 0 <= pred_idx < len(employee_names):
                             emp_name = employee_names[pred_idx]
                             self.label.setText(f"Điểm danh thành công cho nhân viên: {emp_name}")

@@ -25,7 +25,7 @@ namespace Controllers
                           Id = r.Id,
                           EmployeeName = e.Name,
                           TimestampIn = r.TimestampIn,
-                          TimestampOut = r.TimestampOut,
+                          // TimestampOut = r.TimestampOut, // Đã xóa cột timestamp_out khỏi database
                           Status = r.Status,
                           PhotoPath = r.PhotoPath,
                           DeviceId = r.DeviceId
