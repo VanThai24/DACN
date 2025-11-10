@@ -6,9 +6,8 @@ from db import DB_PATH, init_db
 
 app = Flask(__name__)
 import io
-@app.before_first_request
-def setup_db():
-    init_db()
+# Khởi tạo DB ngay khi app start, không dùng decorator để tránh lỗi Flask mới
+init_db()
 # API: Thêm khuôn mặt mới
 @app.route('/add_face', methods=['POST'])
 def add_face():
@@ -16,22 +15,41 @@ def add_face():
         return jsonify({'success': False, 'reason': 'Image and name required'}), 400
     file = request.files['image']
     name = request.form['name']
-    img = face_recognition.load_image_file(file)
-    face_locations = face_recognition.face_locations(img)
-    if not face_locations:
-        return jsonify({'success': False, 'reason': 'No face found'}), 400
-    if len(face_locations) > 1:
-        return jsonify({'success': False, 'reason': 'Multiple faces detected'}), 400
-    encodings = face_recognition.face_encodings(img, known_face_locations=face_locations)
-    if not encodings:
-        return jsonify({'success': False, 'reason': 'Face encoding failed'}), 400
-    embedding = encodings[0].astype(np.float64).tobytes()
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('INSERT INTO faces (name, embedding) VALUES (?, ?)', (name, embedding))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True, 'message': 'Face added successfully'})
+    import tensorflow as tf
+    from tensorflow.keras.preprocessing import image
+    import io
+    try:
+        print(f"[DEBUG] file.filename={file.filename}, content_type={file.content_type}, content_length={file.content_length}")
+        img_bytes = file.read()
+        print(f"[DEBUG] img_bytes length={len(img_bytes)}")
+        # Lưu file tạm để kiểm tra
+        with open("debug_upload.jpg", "wb") as f:
+            f.write(img_bytes)
+        img = image.load_img(io.BytesIO(img_bytes), target_size=(128, 128))
+    except Exception as e:
+        print(f"[ERROR] Cannot open image: {e}")
+        return jsonify({'success': False, 'reason': f'Cannot open image: {e}'})
+    try:
+        img_array = image.img_to_array(img) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
+        model_path = 'faceid_model_tf.h5'
+        model = tf.keras.models.load_model(model_path)
+        embedding = model.predict(img_array)[0]
+        # Log tự động kiểm tra embedding
+        with open("embedding_debug.log", "a", encoding="utf-8") as f:
+            f.write(f"name={name}, embedding_shape={embedding.shape}, embedding_sample={embedding[:5].tolist()}\n")
+        embedding_bytes = embedding.astype(np.float64).tobytes()
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('INSERT INTO faces (name, embedding) VALUES (?, ?)', (name, embedding_bytes))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Face added successfully'})
+    except Exception as e:
+        print(f"[ERROR] Model or DB error: {e}")
+        with open("embedding_debug.log", "a", encoding="utf-8") as f:
+            f.write(f"name={name}, ERROR: {e}\n")
+        return jsonify({'success': False, 'reason': f'Model or DB error: {e}'})
 
 # API: Xóa khuôn mặt theo id
 @app.route('/delete_face', methods=['DELETE'])

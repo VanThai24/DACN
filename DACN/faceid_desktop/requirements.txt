@@ -1,4 +1,6 @@
 PySide6
 opencv-python
-face_recognition
 requests
+numpy
+tensorflow
+mysql-connector-python

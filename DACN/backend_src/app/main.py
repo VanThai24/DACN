@@ -52,7 +52,7 @@ async def log_requests(request: Request, call_next):
 
 app.include_router(employees.router, prefix="/employees", tags=["employees"])
 app.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(faceid.router, prefix="/api/faceid")
 
 @app.get("/")

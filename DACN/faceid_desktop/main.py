@@ -6,6 +6,30 @@ import cv2
 import mysql.connector
 
 class FaceIDApp(QWidget):
+    def get_jwt_token(self, username, password):
+        import requests
+        url = "http://localhost:8000/api/auth/login"
+        data = {"username": username, "password": password}
+        try:
+            resp = requests.post(url, json=data)
+            print(f"[JWT DEBUG] status={resp.status_code}, response={resp.text}")
+            if resp.status_code == 200 and "access_token" in resp.json():
+                print(f"[JWT TOKEN] {resp.json()['access_token']}")
+                return resp.json()["access_token"]
+        except Exception as ex:
+            print(f"[JWT ERROR] {ex}")
+        return None
+    def get_jwt_token(self, username, password):
+        import requests
+        url = "http://localhost:8000/api/auth/login"
+        data = {"username": username, "password": password}
+        try:
+            resp = requests.post(url, json=data)
+            if resp.status_code == 200 and "access_token" in resp.json():
+                return resp.json()["access_token"]
+        except Exception as ex:
+            print(f"[JWT ERROR] {ex}")
+        return None
     def __init__(self):
         super().__init__()
         self.setWindowTitle("FaceID Scan - Employee Lobby")
@@ -37,12 +61,6 @@ class FaceIDApp(QWidget):
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
     def toggle_camera(self):
-        import tensorflow as tf
-        import numpy as np
-        import os
-        from tensorflow.keras.preprocessing.image import img_to_array
-        model_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_model_tf.h5')
-        model = tf.keras.models.load_model(model_path)
         # Lấy class_names từ database (photo_path)
         db = mysql.connector.connect(
             host="localhost",
@@ -57,6 +75,10 @@ class FaceIDApp(QWidget):
         employee_names = [row[0] for row in employee_rows]  # name
         cursor.close()
         db.close()
+
+        # Lấy JWT token cho user (ví dụ dùng phone làm username, mật khẩu mặc định 123456)
+        jwt_token = self.get_jwt_token("testuser", "123456")
+
         if not self.camera_running:
             self.cap = cv2.VideoCapture(0)
             if not self.cap.isOpened():
@@ -67,6 +89,12 @@ class FaceIDApp(QWidget):
             self.label.setText("Camera đang bật. Đưa khuôn mặt vào khung hình để xác thực...")
             scanned = False
             from PySide6.QtGui import QImage, QPixmap
+            import tensorflow as tf
+            import numpy as np
+            import os
+            from tensorflow.keras.utils import img_to_array
+            model_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_model_tf.h5')
+            model = tf.keras.models.load_model(model_path)
             while self.camera_running:
                 ret, frame = self.cap.read()
                 if not ret:
@@ -101,7 +129,7 @@ class FaceIDApp(QWidget):
                             if region.shape[0] < 10 or region.shape[1] < 10:
                                 continue
                             region_resized = cv2.resize(region, (128, 128))
-                            region_array = img_to_array(region_resized) / 255.0
+                            region_array = np.array(region_resized) / 255.0
                             region_array = np.expand_dims(region_array, axis=0)
                             preds = model.predict(region_array)
                             preds_list.append(preds[0])
@@ -113,11 +141,20 @@ class FaceIDApp(QWidget):
                         avg_preds = np.mean(preds_list, axis=0)
                         pred_idx = np.argmax(avg_preds)
                         confidence = avg_preds[pred_idx]
-                        threshold = 0.6  # Ngưỡng xác suất, có thể điều chỉnh
+                        threshold = 0.8  # Ngưỡng xác suất, tăng để giảm nhận diện sai
                         if confidence >= threshold and 0 <= pred_idx < len(employee_names):
                             emp_name = employee_names[pred_idx]
                             self.label.setText(f"Điểm danh thành công cho nhân viên: {emp_name}")
-                            # Lưu thông tin điểm danh và bắt đầu ca làm vào database
+                            # Gửi embedding lên backend qua API /scan kèm JWT
+                            import requests
+                            embedding = avg_preds.tolist()
+                            headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else {}
+                            scan_url = "http://localhost:8000/api/faceid/scan"
+                            try:
+                                resp = requests.post(scan_url, json={"encodings": embedding}, headers=headers)
+                                print("[SCAN API]", resp.status_code, resp.text)
+                            except Exception as ex:
+                                print(f"[SCAN ERROR] {ex}")
                             db2 = mysql.connector.connect(
                                 host="localhost",
                                 user="root",

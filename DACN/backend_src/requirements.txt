@@ -6,6 +6,8 @@ python-jose
 passlib
 pydantic
 pydantic-settings
-face-recognition
 opencv-python
 psycopg2-binary
+numpy
+tensorflow
+mysql-connector-python
