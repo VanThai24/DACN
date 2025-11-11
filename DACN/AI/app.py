@@ -32,19 +32,22 @@ def add_face():
     try:
         img_array = image.img_to_array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
-        model_path = 'faceid_model_tf.h5'
+        import os
+        model_path = os.path.join(os.path.dirname(__file__), 'faceid_model_tf.h5')
         model = tf.keras.models.load_model(model_path)
         embedding = model.predict(img_array)[0]
         # Log tự động kiểm tra embedding
         with open("embedding_debug.log", "a", encoding="utf-8") as f:
             f.write(f"name={name}, embedding_shape={embedding.shape}, embedding_sample={embedding[:5].tolist()}\n")
         embedding_bytes = embedding.astype(np.float64).tobytes()
+        import base64
+        embedding_b64 = base64.b64encode(embedding_bytes).decode("utf-8")
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute('INSERT INTO faces (name, embedding) VALUES (?, ?)', (name, embedding_bytes))
         conn.commit()
         conn.close()
-        return jsonify({'success': True, 'message': 'Face added successfully'})
+        return jsonify({'success': True, 'message': 'Face added successfully', 'embedding_b64': embedding_b64})
     except Exception as e:
         print(f"[ERROR] Model or DB error: {e}")
         with open("embedding_debug.log", "a", encoding="utf-8") as f:

@@ -7,15 +7,18 @@ class EmployeeBase(BaseModel):
     department: Optional[str] = None
     role: Optional[str] = None
     is_locked: Optional[int] = 0
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    photo_path: Optional[str] = None
 
 class EmployeeCreate(EmployeeBase):
     pass
 
 class Employee(EmployeeBase):
-    id: int
-    is_locked: int
+    id: Optional[int] = None
+    
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class AttendanceRecordBase(BaseModel):
     employee_id: int

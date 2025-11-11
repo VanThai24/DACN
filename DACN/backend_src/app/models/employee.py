@@ -9,6 +9,7 @@ class Employee(Base):
     name = Column(String(100), nullable=False)
     department = Column(String(100))
     phone = Column(String(20))
+    email = Column(String(100))
     role = Column(String(50))
     face_embedding = Column(LargeBinary)
     is_locked = Column(Integer, nullable=False, default=0)

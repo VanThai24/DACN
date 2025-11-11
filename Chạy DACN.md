@@ -10,7 +10,7 @@ Kích hoạt môi trường ảo:
 
 Chạy backend bằng lệnh:
 
-venv\\Scripts\\python.exe -m uvicorn backend\_src.app.main:app --host 0.0.0.0 --port 8000
+venv\Scripts\python.exe -m uvicorn backend_src.app.main:app --host 0.0.0.0 --port 8000
 
 
 

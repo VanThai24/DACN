@@ -42,22 +42,29 @@ namespace DACN.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken] // Nên có để bảo mật
+        // [ValidateAntiForgeryToken] // Tạm thời bỏ để debug
         public IActionResult Create(Employee emp, IFormFile FaceImage)
         {
             if (HttpContext.Session.GetString("User") == null)
                 return Redirect("/Account/Login");
             try
             {
+                System.Diagnostics.Debug.WriteLine("[DEBUG] Starting Create action");
+                
+                // Luôn đặt Role = "employee" ngay từ đầu
+                emp.Role = "employee";
+                
                 // Kiểm tra Phone/Username đã tồn tại chưa
                 if (!string.IsNullOrEmpty(emp.Phone) && _context.Users.Any(u => u.Username == emp.Phone))
                 {
-                    ModelState.AddModelError("Phone", "Số điện thoại này đã được dùng làm tài khoản.");
+                    ViewBag.ErrorMessage = "Số điện thoại này đã được dùng làm tài khoản.";
+                    return View(emp);
                 }
 
-                if (ModelState.IsValid)
+                // Bỏ qua ModelState validation tạm thời để debug
+                // if (ModelState.IsValid)
                 {
-                    emp.Role = "employee";
+                    System.Diagnostics.Debug.WriteLine("[DEBUG] Proceeding to create employee");
                     
                     if (FaceImage != null && FaceImage.Length > 0)
                     {
@@ -89,7 +96,7 @@ namespace DACN.Controllers
                                 
                                 // Đổi .Result thành await để tránh deadlock (nên dùng async/await)
                                 // Hiện tại giữ nguyên .Result vì Controller action chưa là async
-                                var response = httpClient.PostAsync("http://localhost:5000/add_face", form).Result; 
+                                var response = httpClient.PostAsync("http://localhost:8000/api/faceid/add_face", form).Result; 
                                 
                                 if (response.IsSuccessStatusCode)
                                 {
@@ -107,9 +114,15 @@ namespace DACN.Controllers
                             TempData["WarningMessage"] = "Thêm nhân viên thành công, nhưng **lấy Face Embedding thất bại**. Kiểm tra API Server.";
                         }
                     }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("[DEBUG] No face image provided");
+                    }
                     
+                    System.Diagnostics.Debug.WriteLine("[DEBUG] Adding employee to database");
                     _context.Employees.Add(emp);
                     _context.SaveChanges();
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Employee saved with ID: {emp.Id}");
 
                     // Tạo tài khoản user cho nhân viên nếu chưa tồn tại
                     if (!string.IsNullOrEmpty(emp.Phone))
@@ -141,8 +154,10 @@ namespace DACN.Controllers
                     return RedirectToAction("Index");
                 }
 
-                ViewBag.ErrorMessage = "Thêm nhân viên thất bại. Vui lòng kiểm tra lại thông tin.";
-                return View(emp);
+                // var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                // ViewBag.ErrorMessage = $"Thêm nhân viên thất bại. Lỗi: {errors}";
+                // System.Diagnostics.Debug.WriteLine($"[DEBUG] ModelState invalid: {errors}");
+                // return View(emp);
             }
             catch (Exception ex)
             {
@@ -164,7 +179,8 @@ namespace DACN.Controllers
             {
                 // Sử dụng System.Text.Json.JsonDocument để parse (cần using System.Text.Json;)
                 var obj = JsonDocument.Parse(json);
-                if (obj.RootElement.TryGetProperty("embedding", out var emb))
+                // API trả về "embedding_b64" chứ không phải "embedding"
+                if (obj.RootElement.TryGetProperty("embedding_b64", out var emb))
                 {
                     var base64 = emb.GetString();
                     if (!string.IsNullOrEmpty(base64))

@@ -1,5 +1,5 @@
 from backend_src.app.models.employee import Employee, AttendanceRecord
-from backend_src.app.schemas.employee import EmployeeCreate, Employee, AttendanceRecordCreate
+from backend_src.app.schemas.employee import EmployeeCreate, AttendanceRecordCreate, Employee as EmployeeSchema
 from backend_src.app.database import SessionLocal
 from sqlalchemy.orm import Session
 

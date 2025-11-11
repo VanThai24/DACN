@@ -1,0 +1,2 @@
+name=Đặng Văn Thái, ERROR: [Errno 2] Unable to synchronously open file (unable to open file: name = 'faceid_model_tf.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+name=Đặng Văn Thái, embedding_shape=(6,), embedding_sample=[3.917026702993098e-09, 2.847720947940502e-10, 2.430514567220088e-24, 9.551490929096763e-18, 1.0]
