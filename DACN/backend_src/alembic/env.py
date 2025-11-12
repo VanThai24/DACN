@@ -14,16 +14,20 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-
 # add your model's MetaData object here
 # for 'autogenerate' support
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from app.database import Base
-from app.models.employee import Employee, AttendanceRecord
-from app.models.user import User
-from app.models.device import Device
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+# Import app configuration and set database URL from .env
+from backend_src.app.config import settings
+config.set_main_option("sqlalchemy.url", settings.database_url)
+
+from backend_src.app.database import Base
+from backend_src.app.models.employee import Employee, AttendanceRecord
+from backend_src.app.models.user import User
+from backend_src.app.models.device import Device
 from app.models.shift import Shift
 from app.models.report import Report
 target_metadata = Base.metadata

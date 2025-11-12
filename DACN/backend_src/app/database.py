@@ -1,18 +1,31 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-import os
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from backend_src.app.config import settings
+from loguru import logger
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:12345@localhost:3306/attendance_db")
+# Use settings from config
+DATABASE_URL = settings.database_url
 
-engine = create_engine(DATABASE_URL)
+# Create engine with connection pooling
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=10,  # Number of connections to keep in pool
+    max_overflow=20,  # Max connections beyond pool_size
+    pool_pre_ping=True,  # Verify connections before using
+    pool_recycle=3600,  # Recycle connections after 1 hour
+    echo=False  # Set to True for SQL debug logging
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-from sqlalchemy.orm import Session
+logger.info(f"Database engine created: {DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else DATABASE_URL}")
+
 
 def get_db():
-	db = SessionLocal()
-	try:
-		yield db
-	finally:
-		db.close()
+    """Database session dependency for FastAPI"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

@@ -1,23 +1,34 @@
 
-from fastapi import APIRouter, Depends, HTTPException
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
 from slowapi.util import get_remote_address
-from fastapi import Request
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from datetime import datetime, timedelta
+from typing import Optional
+from loguru import logger
+
 from ..database import get_db
 from ..models import user as user_model
 from ..models.employee import Employee as EmployeeModel
-from ..schemas import employee as employee_schema
-from pydantic import BaseModel
-from backend_src.app.security import verify_password
-from jose import jwt
-from datetime import datetime, timedelta
+from ..security import (
+    verify_password, 
+    hash_password,
+    create_access_token, 
+    create_refresh_token,
+    verify_token,
+    get_current_user,
+    audit_logger,
+    validate_password_strength,
+    sanitize_html
+)
+from ..config import settings
+
+# ============= Schemas =============
 
 class LoginRequest(BaseModel):
     username: str
     password: str
-
-from typing import Optional
 
 class LoginResponse(BaseModel):
     id: int
@@ -28,35 +39,76 @@ class LoginResponse(BaseModel):
     phone: Optional[str] = None
     avatar: Optional[str] = None
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
+    expires_in: int = settings.jwt_access_token_expire_minutes * 60  # seconds
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = settings.jwt_access_token_expire_minutes * 60
+
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+    full_name: str
+    role: str = "employee"
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+# ============= Router Setup =============
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
-SECRET_KEY = "your_secret_key_here"  # Nên lưu vào biến môi trường thực tế
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-@router.post("/login", response_model=LoginResponse)
-@limiter.limit("5/minute")
+@router.post(
+    "/login", 
+    response_model=LoginResponse,
+    status_code=status.HTTP_200_OK,
+    summary="User login",
+    description="Authenticate user and return JWT tokens with strict rate limiting (5 attempts/minute)"
+)
+@limiter.limit("5/minute")  # Strict rate limit for login
 def login(request_data: LoginRequest, request: Request, db: Session = Depends(get_db)):
     """
-    Đăng nhập hệ thống, trả về thông tin người dùng và JWT token nếu thành công.
-    - request: username, password
-    - response: id, username, full_name, role, department, phone, access_token, token_type
+    Đăng nhập hệ thống, trả về thông tin người dùng và JWT tokens
+    - Rate limit: 5 lần/phút để chống brute force
+    - Audit logging cho mọi login attempt
     """
+    client_ip = request.client.host
+    
+    # Sanitize input
+    username = sanitize_html(request_data.username.strip())
+    password = sanitize_html(request_data.password)
+    
     try:
-        user = db.query(user_model.User).filter(user_model.User.username == request_data.username).first()
-        if not user or not verify_password(request_data.password, user.password_hash):
-            raise HTTPException(status_code=401, detail="Sai tài khoản hoặc mật khẩu")
-        access_token = create_access_token(data={"sub": user.username, "user_id": user.id, "role": user.role})
+        # Find user
+        user = db.query(user_model.User).filter(user_model.User.username == username).first()
+        # Check credentials
+        if not user or not verify_password(password, user.password_hash):
+            # Log failed attempt
+            audit_logger.log_login_attempt(username, False, client_ip)
+            logger.warning(f"Failed login attempt for user '{username}' from {client_ip}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail="Sai tài khoản hoặc mật khẩu"
+            )
+        # Create tokens
+        token_data = {
+            "sub": str(user.id),
+            "username": user.username,
+            "role": user.role
+        }
+        access_token = create_access_token(token_data)
+        refresh_token = create_refresh_token(token_data)
+        # Log successful login
+        audit_logger.log_login_attempt(username, True, client_ip)
+        logger.info(f"Successful login for user '{username}' (ID: {user.id}) from {client_ip}")
         # Nếu user chưa liên kết employee, thử tự động liên kết theo username = phone
         employee = user.employee
         # Tự động liên kết employee nếu chưa có
@@ -94,10 +146,224 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
             phone=phone,
             avatar=avatar,
             access_token=access_token,
+            refresh_token=refresh_token,
             token_type="bearer"
         )
+    except HTTPException:
+        raise
     except Exception as ex:
-        import traceback
-        print("[LOGIN ERROR]", ex)
-        print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {ex}")
+        logger.error(f"Login error: {ex}")
+        audit_logger.log_security_event("LOGIN_ERROR", str(ex), client_ip, username)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="Đã xảy ra lỗi trong quá trình đăng nhập"
+        )
+
+
+@router.post(
+    "/refresh",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Refresh access token",
+    description="Get new access token using refresh token"
+)
+@limiter.limit("10/minute")
+def refresh_token_endpoint(
+    token_request: RefreshTokenRequest,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Làm mới access token bằng refresh token"""
+    client_ip = request.client.host
+    
+    try:
+        # Verify refresh token
+        payload = verify_token(token_request.refresh_token, token_type="refresh")
+        
+        # Create new access token
+        new_token_data = {
+            "sub": payload.get("sub"),
+            "username": payload.get("username"),
+            "role": payload.get("role")
+        }
+        new_access_token = create_access_token(new_token_data)
+        
+        logger.info(f"Token refreshed for user {payload.get('username')} from {client_ip}")
+        
+        return TokenResponse(access_token=new_access_token)
+        
+    except HTTPException:
+        raise
+    except Exception as ex:
+        logger.error(f"Token refresh error: {ex}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
+
+
+@router.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    summary="Register new user",
+    description="Create new user account with password strength validation (Rate limited: 3/hour)"
+)
+@limiter.limit("3/hour")  # Very strict rate limit for registration
+def register(
+    register_data: RegisterRequest,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Đăng ký tài khoản mới"""
+    client_ip = request.client.host
+    
+    # Sanitize input
+    username = sanitize_html(register_data.username.strip())
+    full_name = sanitize_html(register_data.full_name.strip())
+    password = sanitize_html(register_data.password)
+    
+    try:
+        # Check if user already exists
+        existing_user = db.query(user_model.User).filter(
+            user_model.User.username == username
+        ).first()
+        if existing_user:
+            logger.warning(f"Registration attempt with existing username '{username}' from {client_ip}")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Tên đăng nhập đã tồn tại"
+            )
+        # Validate password strength
+        if not validate_password_strength(password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
+            )
+        # Create new user
+        hashed_password = hash_password(password)
+        new_user = user_model.User(
+            username=username,
+            password_hash=hashed_password,
+            role=register_data.role
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        # Log successful registration
+        audit_logger.log_user_creation("system", str(new_user.id), client_ip)
+        logger.info(f"New user registered: {username} (ID: {new_user.id}) from {client_ip}")
+        return {
+            "success": True,
+            "message": "Đăng ký thành công",
+            "user_id": new_user.id,
+            "username": new_user.username
+        }
+    except HTTPException:
+        raise
+    except Exception as ex:
+        logger.error(f"Registration error: {ex}")
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Đã xảy ra lỗi trong quá trình đăng ký"
+        )
+
+
+@router.post(
+    "/change-password",
+    status_code=status.HTTP_200_OK,
+    summary="Change password",
+    description="Change user password with validation"
+)
+@limiter.limit("5/hour")
+def change_password(
+    password_data: ChangePasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        # Sanitize input
+        old_password = sanitize_html(password_data.old_password)
+        new_password = sanitize_html(password_data.new_password)
+        client_ip = request.client.host
+        user_id = current_user.get("user_id")
+        # Get user
+        user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Không tìm thấy người dùng"
+            )
+        # Verify old password
+        if not verify_password(old_password, user.password_hash):
+            logger.warning(f"Failed password change attempt for user {user_id} from {client_ip}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Mật khẩu cũ không chính xác"
+            )
+        # Validate new password strength
+        if not validate_password_strength(new_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
+            )
+        # Check new password is different
+        if old_password == new_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu mới phải khác mật khẩu cũ"
+            )
+        # Update password
+        user.password_hash = hash_password(new_password)
+        db.commit()
+        # Log password change
+        audit_logger.log_security_event("PASSWORD_CHANGED", f"User {user_id}", client_ip, str(user_id))
+        logger.info(f"Password changed for user {user_id} from {client_ip}")
+        return {
+            "success": True,
+            "message": "Đổi mật khẩu thành công"
+        }
+    except HTTPException:
+        raise
+    except Exception as ex:
+        logger.error(f"Change password error: {ex}")
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Đã xảy ra lỗi trong quá trình đổi mật khẩu"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as ex:
+        logger.error(f"Change password error: {ex}")
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Đã xảy ra lỗi trong quá trình đổi mật khẩu"
+        )
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_200_OK,
+    summary="Logout user",
+    description="Logout and log the event"
+)
+def logout(
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
+    """Đăng xuất"""
+    client_ip = request.client.host
+    user_id = current_user.get("user_id")
+    
+    # Log logout
+    audit_logger.log_logout(str(user_id), client_ip)
+    logger.info(f"User {user_id} logged out from {client_ip}")
+    
+    return {
+        "success": True,
+        "message": "Đăng xuất thành công"
+    }

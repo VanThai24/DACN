@@ -1,0 +1,73 @@
+2025-11-12 09:31:44.761 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:32:17.686 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:32:36.859 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:32:36.879 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:33:56.302 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:36:34.440 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:37:56.327 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:39:13.641 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:39:32.236 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:39:40.317 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:40:03.447 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:40:22.299 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:46:53.883 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:47:20.530 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:47:50.413 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:48:00.562 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:48:10.095 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:49:14.203 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:49:58.180 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:51:05.865 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 09:51:44.495 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 09:51:44.519 | ERROR    | backend_src.app.routers.auth:login:155 - Login error: (sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.password_hash AS users_password_hash, users.role AS users_role, users.employee_id AS users_employee_id 
+FROM users 
+WHERE users.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('testuser', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-12 09:51:44.519 | WARNING  | backend_src.app.security:log_security_event:383 - SECURITY_EVENT: LOGIN_ERROR, user=testuser, ip=127.0.0.1, details=(sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.password_hash AS users_password_hash, users.role AS users_role, users.employee_id AS users_employee_id 
+FROM users 
+WHERE users.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('testuser', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-12 09:51:44.521 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 09:52:09.238 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 09:52:09.244 | ERROR    | backend_src.app.routers.auth:login:155 - Login error: (sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.password_hash AS users_password_hash, users.role AS users_role, users.employee_id AS users_employee_id 
+FROM users 
+WHERE users.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('testuser', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-12 09:52:09.244 | WARNING  | backend_src.app.security:log_security_event:383 - SECURITY_EVENT: LOGIN_ERROR, user=testuser, ip=127.0.0.1, details=(sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.password_hash AS users_password_hash, users.role AS users_role, users.employee_id AS users_employee_id 
+FROM users 
+WHERE users.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('testuser', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-12 09:52:09.246 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 10:08:16.628 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 10:08:16.909 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 10:12:36.541 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 10:12:36.551 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 10:25:35.020 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 10:25:46.076 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 10:25:46.234 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 10:41:33.717 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 10:43:34.092 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 10:45:38.258 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 10:45:42.482 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 10:45:42.971 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 10:47:34.452 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 10:47:40.775 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 10:47:41.084 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 10:48:20.781 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 10:48:30.191 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 10:48:30.559 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 10:49:09.360 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 10:49:18.495 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 10:49:18.968 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200

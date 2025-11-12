@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: dacn_postgres
+    environment:
+      POSTGRES_USER: dacn_user
+      POSTGRES_PASSWORD: dacn_password
+      POSTGRES_DB: dacn_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dacn_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dacn_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: dacn_redis
+    command: redis-server --requirepass dacn_redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - dacn_network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dacn_backend
+    environment:
+      DATABASE_URL: postgresql://dacn_user:dacn_password@postgres:5432/dacn_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: dacn_redis_password
+      ENVIRONMENT: production
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-this-in-production}
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+      - ./wwwroot:/app/wwwroot
+      - ./AI:/app/AI
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dacn_network
+    restart: unless-stopped
+
+  # Flask AI Backend
+  ai_backend:
+    build:
+      context: ../AI
+      dockerfile: Dockerfile
+    container_name: dacn_ai_backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./AI/face_data:/app/face_data
+      - ./AI/faceid_model_tf.h5:/app/faceid_model_tf.h5
+    environment:
+      FLASK_ENV: production
+    networks:
+      - dacn_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  dacn_network:
+    driver: bridge

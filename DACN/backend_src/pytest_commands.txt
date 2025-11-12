@@ -1,0 +1,23 @@
+# Run All Tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run with coverage report
+pytest --cov=app --cov-report=html --cov-report=term-missing
+
+# Run specific test file
+pytest tests/test_validation.py -v
+
+# Run tests matching pattern
+pytest -k "validation" -v
+
+# Run and stop on first failure
+pytest -x
+
+# Run with detailed output
+pytest -vv --tb=long
+
+# Run tests in parallel (requires pytest-xdist)
+pytest -n auto

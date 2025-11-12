@@ -1,17 +1,25 @@
-import sqlite3
+import os
 
-DB_PATH = 'face_db.sqlite'
+# Sử dụng MySQL database giống AdminWeb
+DB_CONFIG = {
+    'host': 'localhost',
+    'port': 3306,
+    'database': 'attendance_db',
+    'user': 'root',
+    'password': '12345'
+}
+
+def get_db_connection():
+    """Kết nối MySQL database"""
+    import mysql.connector
+    return mysql.connector.connect(**DB_CONFIG)
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS faces (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        embedding BLOB NOT NULL
-    )''')
-    conn.commit()
-    conn.close()
+    """
+    Database đã có sẵn từ AdminWeb
+    Table: employees với cột face_embedding
+    """
+    pass
 
 if __name__ == '__main__':
     init_db()

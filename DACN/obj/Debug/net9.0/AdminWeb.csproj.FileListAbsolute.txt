@@ -350,3 +350,4 @@ D:\DACN\DACN\bin\Debug\net9.0\backend_src\venv\Lib\site-packages\setuptools\conf
 D:\DACN\DACN\bin\Debug\net9.0\backend_src\venv\Lib\site-packages\scipy\stats\tests\data\studentized_range_mpmath_ref.json
 D:\DACN\DACN\bin\Debug\net9.0\venv\Lib\site-packages\setuptools\config\distutils.schema.json
 D:\DACN\DACN\bin\Debug\net9.0\venv\Lib\site-packages\setuptools\config\setuptools.schema.json
+D:\DACN\DACN\bin\Debug\net9.0\venv\Lib\site-packages\scipy\stats\tests\data\studentized_range_mpmath_ref.json

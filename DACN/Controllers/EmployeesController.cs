@@ -1,12 +1,13 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore; // <-- Thêm để dùng AsNoTracking
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.IO;
 using System;
 using System.Linq;
-using System.Net.Http.Headers; // <-- Đã thêm
-using System.Text.Json; // <-- Đã thêm để hỗ trợ JsonDocument
+using System.Net.Http.Headers;
+using System.Text.Json;
 using Data;
 using Models;
 using BCrypt.Net;
@@ -16,9 +17,12 @@ namespace DACN.Controllers
     public class EmployeesController : Controller
     {
         private readonly AppDbContext _context;
-        public EmployeesController(AppDbContext context)
+        private readonly ILogger<EmployeesController> _logger;
+        
+        public EmployeesController(AppDbContext context, ILogger<EmployeesController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -42,15 +46,13 @@ namespace DACN.Controllers
         }
 
         [HttpPost]
-        // [ValidateAntiForgeryToken] // Tạm thời bỏ để debug
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Employee emp, IFormFile FaceImage)
         {
             if (HttpContext.Session.GetString("User") == null)
                 return Redirect("/Account/Login");
             try
             {
-                System.Diagnostics.Debug.WriteLine("[DEBUG] Starting Create action");
-                
                 // Luôn đặt Role = "employee" ngay từ đầu
                 emp.Role = "employee";
                 
@@ -61,10 +63,8 @@ namespace DACN.Controllers
                     return View(emp);
                 }
 
-                // Bỏ qua ModelState validation tạm thời để debug
-                // if (ModelState.IsValid)
+                if (ModelState.IsValid)
                 {
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] Proceeding to create employee");
                     
                     if (FaceImage != null && FaceImage.Length > 0)
                     {
@@ -110,19 +110,13 @@ namespace DACN.Controllers
                         catch (Exception ex)
                         {
                             // Cảnh báo nếu không lấy được embedding nhưng vẫn tạo nhân viên
-                            System.Diagnostics.Debug.WriteLine($"[EMBEDDING ERROR] {ex.Message}");
+                            _logger?.LogWarning($"Failed to get face embedding: {ex.Message}");
                             TempData["WarningMessage"] = "Thêm nhân viên thành công, nhưng **lấy Face Embedding thất bại**. Kiểm tra API Server.";
                         }
                     }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("[DEBUG] No face image provided");
-                    }
                     
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] Adding employee to database");
                     _context.Employees.Add(emp);
                     _context.SaveChanges();
-                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Employee saved with ID: {emp.Id}");
 
                     // Tạo tài khoản user cho nhân viên nếu chưa tồn tại
                     if (!string.IsNullOrEmpty(emp.Phone))
@@ -154,20 +148,14 @@ namespace DACN.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-                // ViewBag.ErrorMessage = $"Thêm nhân viên thất bại. Lỗi: {errors}";
-                // System.Diagnostics.Debug.WriteLine($"[DEBUG] ModelState invalid: {errors}");
-                // return View(emp);
+                var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                ViewBag.ErrorMessage = $"Thêm nhân viên thất bại. Lỗi: {errors}";
+                return View(emp);
             }
             catch (Exception ex)
             {
-                string errorMsg = ex.Message;
-                if (ex.InnerException != null)
-                {
-                    errorMsg += " | Inner: " + ex.InnerException.Message;
-                }
-                System.Diagnostics.Debug.WriteLine($"[CREATE ERROR] {errorMsg}");
-                ViewBag.ErrorMessage = "Thêm nhân viên thất bại: " + errorMsg;
+                _logger?.LogError(ex, "Error creating employee");
+                ViewBag.ErrorMessage = "Thêm nhân viên thất bại: " + ex.Message;
                 return View(emp);
             }
         }
@@ -219,12 +207,12 @@ namespace DACN.Controllers
                 })
                 {
                     smtp.Send(message);
-                    System.Diagnostics.Debug.WriteLine($"[EMAIL SUCCESS] Sent to {toEmail}");
+                    _logger.LogInformation($"Email sent successfully to {toEmail}");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[EMAIL ERROR] To: {toEmail}, Name: {empName}, Phone: {phone}, Error: {ex.Message}");
+                _logger.LogError(ex, $"Failed to send email to {toEmail}");
             }
         }
 
@@ -288,7 +276,7 @@ namespace DACN.Controllers
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[EMBEDDING UPDATE ERROR] {ex.Message}");
+                        _logger.LogWarning(ex, "Failed to update face embedding");
                         TempData["WarningMessage"] = "Cập nhật nhân viên thành công, nhưng **cập nhật Face Embedding thất bại**. Kiểm tra API Server.";
                         // Nếu thất bại, giữ lại embedding cũ
                         emp.FaceEmbedding = dbEmp.FaceEmbedding; 
