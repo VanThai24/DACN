@@ -12,8 +12,8 @@ from pydantic import field_validator
 class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
     
-    # Database
-    database_url: str = "sqlite:///./dacn.db"
+    # Database - MySQL connection
+    database_url: str = "mysql+mysqlconnector://root:12345@127.0.0.1:3306/attendance_db"
     
     # JWT
     jwt_secret_key: str = "dev-secret-key-please-change"

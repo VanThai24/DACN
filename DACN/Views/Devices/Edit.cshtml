@@ -1,0 +1,45 @@
+@model Models.Device
+@{
+    ViewBag.Title = "Sửa thiết bị";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h2 class="mb-0">Sửa thiết bị</h2>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-group mb-3">
+                        <label for="Name" class="form-label">Tên thiết bị</label>
+                        <input asp-for="Name" class="form-control" required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="Location" class="form-label">Vị trí</label>
+                        <input asp-for="Location" class="form-control" required />
+                        <span asp-validation-for="Location" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="ApiKey" class="form-label">API Key</label>
+                        <input asp-for="ApiKey" class="form-control" readonly />
+                        <small class="text-muted">API Key không thể chỉnh sửa</small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="LastSeen" class="form-label">Last Seen</label>
+                        <input asp-for="LastSeen" class="form-control" type="datetime-local" />
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Lưu
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,62 +2,273 @@
 @{
     ViewBag.Title = "Danh sách nhân viên";
 }
+
+<!-- Success/Warning/Error Messages -->
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["WarningMessage"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["WarningMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 @if (ViewBag.ErrorMessage != null)
 {
-    <div class="alert alert-danger text-center">@ViewBag.ErrorMessage</div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-x-circle-fill"></i> @ViewBag.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
-<div class="row justify-content-center mt-4">
-    <div class="col-md-10">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                <h2 class="mb-0">Danh sách nhân viên</h2>
-                <a href="/Employees/Create" class="btn btn-light">Thêm nhân viên</a>
+
+<!-- Page Header -->
+<div class="row mb-4 slide-in-up">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-6 fw-bold mb-0">
+                    <i class="bi bi-people-fill text-primary"></i> Quản lý Nhân viên
+                </h1>
+                <p class="text-muted mb-0">Quản lý thông tin nhân viên và khuôn mặt</p>
             </div>
-            <div class="card-body">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên</th>
-                            <th>Phòng ban</th>
-                            <th>Email</th>
-                            <th>Vai trò</th>
-                            <th>Face Embedding</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var emp in Model)
-                        {
-                            <tr>
-                                <td>@emp.Id</td>
-                                <td>@emp.Name</td>
-                                <td>@emp.Department</td>
-                                <td>@emp.Email</td>
-                                <td>@emp.Role</td>
-                                <td>@emp.FaceEmbedding</td>
-                                <td>
-                                    <a href="/Employees/Details/@emp.Id" class="btn btn-sm btn-info">Xem</a>
-                                    <a href="/Employees/Edit/@emp.Id" class="btn btn-sm btn-warning">Sửa</a>
-                                    <a href="/Employees/Delete/@emp.Id" class="btn btn-sm btn-danger">Xóa</a>
-                                    @if (emp.IsLocked)
-                                    {
-                                        <a href="/Employees/Unlock/@emp.Id" class="btn btn-sm btn-secondary">Mở khóa</a>
-                                    }
-                                    else
-                                    {
-                                        <a href="/Employees/Lock/@emp.Id" class="btn btn-sm btn-dark">Khóa</a>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            <a href="/Employees/Create" class="btn btn-success btn-lg">
+                <i class="bi bi-plus-circle"></i> Thêm nhân viên mới
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4 g-3">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="text-primary">@Model.Count()</h3>
+                    <p>Tổng nhân viên</p>
+                </div>
+                <i class="bi bi-people icon text-primary"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="text-success">@Model.Count(e => e.FaceEmbedding != null)</h3>
+                    <p>Đã có Face ID</p>
+                </div>
+                <i class="bi bi-person-check icon text-success"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="text-warning">@Model.Count(e => e.FaceEmbedding == null)</h3>
+                    <p>Chưa có Face ID</p>
+                </div>
+                <i class="bi bi-person-x icon text-warning"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="text-danger">@Model.Count(e => e.IsLocked)</h3>
+                    <p>Đang bị khóa</p>
+                </div>
+                <i class="bi bi-lock icon text-danger"></i>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Employees Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="mb-0 text-white">
+                    <i class="bi bi-table"></i> Danh sách nhân viên
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filter -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" id="searchInput" class="form-control" placeholder="🔍 Tìm kiếm nhân viên...">
+                    </div>
+                    <div class="col-md-3">
+                        <select id="departmentFilter" class="form-select">
+                            <option value="">Tất cả phòng ban</option>
+                            @foreach (var dept in Model.Select(e => e.Department).Distinct())
+                            {
+                                <option value="@dept">@dept</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="statusFilter" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="locked">Bị khóa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="employeeTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;"><i class="bi bi-hash"></i> ID</th>
+                                <th><i class="bi bi-person"></i> Tên</th>
+                                <th><i class="bi bi-building"></i> Phòng ban</th>
+                                <th><i class="bi bi-envelope"></i> Email</th>
+                                <th><i class="bi bi-telephone"></i> Điện thoại</th>
+                                <th style="width: 120px;"><i class="bi bi-person-bounding-box"></i> Face ID</th>
+                                <th style="width: 100px;"><i class="bi bi-shield-check"></i> Trạng thái</th>
+                                <th style="width: 200px;" class="text-center"><i class="bi bi-gear"></i> Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var emp in Model)
+                            {
+                                <tr data-department="@emp.Department" data-status="@(emp.IsLocked ? "locked" : "active")">
+                                    <td><strong>#@emp.Id</strong></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle bg-primary text-white me-2">
+                                                @emp.Name?.Substring(0, 1)
+                                            </div>
+                                            <strong>@emp.Name</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@emp.Department</span>
+                                    </td>
+                                    <td>@emp.Email</td>
+                                    <td>@emp.Phone</td>
+                                    <td>
+                                        @if (emp.FaceEmbedding != null)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Có
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-x-circle"></i> Chưa
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (emp.IsLocked)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-lock"></i> Khóa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-unlock"></i> Hoạt động
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="/Employees/Details/@emp.Id" class="btn btn-info" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="/Employees/Edit/@emp.Id" class="btn btn-warning" title="Chỉnh sửa">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="/Employees/Delete/@emp.Id" class="btn btn-danger" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            @if (emp.IsLocked)
+                                            {
+                                                <a href="/Employees/Unlock/@emp.Id" class="btn btn-secondary" title="Mở khóa">
+                                                    <i class="bi bi-unlock"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="/Employees/Lock/@emp.Id" class="btn btn-dark" title="Khóa">
+                                                    <i class="bi bi-lock"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for Avatar -->
+<style>
+    .avatar-circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+</style>
+
+<!-- Search and Filter Script -->
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const departmentFilter = document.getElementById('departmentFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const table = document.getElementById('employeeTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedDept = departmentFilter.value;
+            const selectedStatus = statusFilter.value;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const dept = row.getAttribute('data-department');
+                const status = row.getAttribute('data-status');
+
+                const matchSearch = text.includes(searchTerm);
+                const matchDept = !selectedDept || dept === selectedDept;
+                const matchStatus = !selectedStatus || status === selectedStatus;
+
+                if (matchSearch && matchDept && matchStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('keyup', filterTable);
+        departmentFilter.addEventListener('change', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+    });
+</script>
+}

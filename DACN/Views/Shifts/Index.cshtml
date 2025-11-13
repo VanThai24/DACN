@@ -5,8 +5,11 @@
 <div class="row justify-content-center mt-4">
     <div class="col-md-10">
         <div class="card shadow">
-            <div class="card-header bg-secondary text-white">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                 <h2 class="mb-0">Danh sách ca làm</h2>
+                <a asp-action="Create" class="btn btn-light">
+                    <i class="bi bi-plus-circle"></i> Thêm mới
+                </a>
             </div>
             <div class="card-body">
                 <table class="table table-bordered table-hover">
@@ -17,6 +20,7 @@
                             <th>Ngày</th>
                             <th>Bắt đầu</th>
                             <th>Kết thúc</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,6 +32,17 @@
                                 <td>@(s.Date?.ToString("dd/MM/yyyy"))</td>
                                 <td>@(s.StartTime.HasValue ? s.StartTime.Value.ToString(@"hh\:mm") : "")</td>
                                 <td>@(s.EndTime.HasValue ? s.EndTime.Value.ToString(@"hh\:mm") : "")</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@s.Id" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@s.Id" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
                             </tr>
                         }
                     </tbody>

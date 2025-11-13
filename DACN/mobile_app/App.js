@@ -33,13 +33,13 @@ export default function App() {
           })}
         >
           <Tab.Screen name="Home" options={{ tabBarLabel: 'Trang chủ' }}>
-            {() => <HomeScreen user={user} />}
+            {({ navigation }) => <HomeScreen user={user} navigation={navigation} />}
           </Tab.Screen>
           <Tab.Screen name="Attendance" options={{ tabBarLabel: 'Điểm danh' }}>
-            {() => <AttendanceScreen user={user} />}
+            {({ navigation }) => <AttendanceScreen user={user} navigation={navigation} />}
           </Tab.Screen>
           <Tab.Screen name="Profile" options={{ tabBarLabel: 'Cá nhân' }}>
-            {() => <ProfileScreen user={user} onLogout={() => { setIsLoggedIn(false); setUser(null); }} />}
+            {({ navigation }) => <ProfileScreen user={user} navigation={navigation} onLogout={() => { setIsLoggedIn(false); setUser(null); }} />}
           </Tab.Screen>
         </Tab.Navigator>
       ) : (

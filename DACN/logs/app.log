@@ -71,3 +71,466 @@ WHERE users.username = ?
 2025-11-12 10:49:09.360 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
 2025-11-12 10:49:18.495 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
 2025-11-12 10:49:18.968 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:07:10.038 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:08:49.375 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 19:08:50.155 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:14:23.836 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:15:25.216 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/add_face from 127.0.0.1
+2025-11-12 19:15:25.755 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:18:48.306 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:18:48.308 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:18:48.325 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:18:48.326 | INFO     | backend_src.app.main:log_requests:88 - Response status: 404
+2025-11-12 19:22:20.021 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:22:33.460 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:22:33.462 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:22:33.480 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:22:33.509 | ERROR    | backend_src.app.routers.auth:login:155 - Login error: (sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.password_hash AS users_password_hash, users.role AS users_role, users.employee_id AS users_employee_id 
+FROM users 
+WHERE users.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('0123456789', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-12 19:22:33.509 | WARNING  | backend_src.app.security:log_security_event:383 - SECURITY_EVENT: LOGIN_ERROR, user=0123456789, ip=192.168.110.32, details=(sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.password_hash AS users_password_hash, users.role AS users_role, users.employee_id AS users_employee_id 
+FROM users 
+WHERE users.username = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('0123456789', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-12 19:22:33.511 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 19:25:28.914 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:26:04.186 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:26:04.190 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:26:04.209 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:26:04.362 | ERROR    | backend_src.app.routers.auth:login:155 - Login error: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-11-12 19:26:04.364 | WARNING  | backend_src.app.security:log_security_event:383 - SECURITY_EVENT: LOGIN_ERROR, user=0123456789, ip=192.168.110.32, details=password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-11-12 19:26:04.368 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 19:29:27.092 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:29:31.509 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:29:31.512 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:29:31.530 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:29:31.584 | ERROR    | backend_src.app.routers.auth:login:156 - Login error: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-11-12 19:29:31.584 | WARNING  | backend_src.app.security:log_security_event:383 - SECURITY_EVENT: LOGIN_ERROR, user=0123456789, ip=192.168.110.32, details=password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-11-12 19:29:31.587 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 19:36:27.773 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:36:32.583 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:36:32.586 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:36:32.617 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:36:32.662 | ERROR    | backend_src.app.routers.auth:login:156 - Login error: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-11-12 19:36:32.662 | WARNING  | backend_src.app.security:log_security_event:383 - SECURITY_EVENT: LOGIN_ERROR, user=0123456789, ip=192.168.110.32, details=password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-11-12 19:36:32.665 | INFO     | backend_src.app.main:log_requests:88 - Response status: 500
+2025-11-12 19:39:17.039 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:39:19.890 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:39:19.892 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:39:19.920 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:39:20.123 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 19:39:20.123 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 19:39:20.126 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:39:20.127 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:39:20.129 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:39:20.337 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:39:20.343 | ERROR    | backend_src.app.main:log_requests:91 - Request failed: (mysql.connector.errors.ProgrammingError) 1054 (42S22): Unknown column 'attendance_records.timestamp_out' in 'field list'
+[SQL: SELECT attendance_records.id AS attendance_records_id, attendance_records.employee_id AS attendance_records_employee_id, attendance_records.device_id AS attendance_records_device_id, attendance_records.timestamp_in AS attendance_records_timestamp_in, attendance_records.timestamp_out AS attendance_records_timestamp_out, attendance_records.status AS attendance_records_status, attendance_records.photo_path AS attendance_records_photo_path 
+FROM attendance_records 
+WHERE attendance_records.employee_id = %(employee_id_1)s]
+[parameters: {'employee_id_1': 34}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-11-12 19:39:34.046 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:39:34.054 | ERROR    | backend_src.app.main:log_requests:91 - Request failed: (mysql.connector.errors.ProgrammingError) 1054 (42S22): Unknown column 'attendance_records.timestamp_out' in 'field list'
+[SQL: SELECT attendance_records.id AS attendance_records_id, attendance_records.employee_id AS attendance_records_employee_id, attendance_records.device_id AS attendance_records_device_id, attendance_records.timestamp_in AS attendance_records_timestamp_in, attendance_records.timestamp_out AS attendance_records_timestamp_out, attendance_records.status AS attendance_records_status, attendance_records.photo_path AS attendance_records_photo_path 
+FROM attendance_records 
+WHERE attendance_records.employee_id = %(employee_id_1)s]
+[parameters: {'employee_id_1': 34}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-11-12 19:40:53.446 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:41:04.032 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:41:04.035 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:41:04.059 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:41:04.224 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 19:41:04.224 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 19:41:04.228 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:41:04.228 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:41:04.230 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:41:04.307 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:41:04.313 | ERROR    | backend_src.app.main:log_requests:91 - Request failed: (mysql.connector.errors.ProgrammingError) 1054 (42S22): Unknown column 'attendance_records.timestamp_out' in 'field list'
+[SQL: SELECT attendance_records.id AS attendance_records_id, attendance_records.employee_id AS attendance_records_employee_id, attendance_records.device_id AS attendance_records_device_id, attendance_records.timestamp_in AS attendance_records_timestamp_in, attendance_records.timestamp_out AS attendance_records_timestamp_out, attendance_records.status AS attendance_records_status, attendance_records.photo_path AS attendance_records_photo_path 
+FROM attendance_records 
+WHERE attendance_records.employee_id = %(employee_id_1)s]
+[parameters: {'employee_id_1': 34}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-11-12 19:44:22.400 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 19:44:28.566 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:44:28.568 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:44:28.588 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:44:28.755 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 19:44:28.755 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 19:44:28.759 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:44:28.759 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:44:28.760 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:44:28.843 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:44:28.853 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:44:53.357 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:44:53.363 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:46:43.279 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:46:43.285 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:46:53.800 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:46:53.804 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:47:30.883 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:47:30.888 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:48:04.059 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:48:04.066 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:56:07.875 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:56:07.876 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:56:07.895 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:56:08.006 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 19:56:08.007 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 19:56:08.009 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:56:08.010 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:56:08.011 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:56:08.147 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:56:08.150 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:56:23.198 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:56:23.203 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:56:42.009 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:56:42.013 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:57:26.452 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:57:26.453 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:57:26.478 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:57:26.592 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 19:57:26.592 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 19:57:26.594 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:57:26.594 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:57:26.596 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:59:33.430 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 19:59:33.431 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:59:33.450 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 19:59:33.559 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 19:59:33.559 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 19:59:33.562 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:59:33.562 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 19:59:33.563 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:59:33.691 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:59:33.694 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 19:59:38.638 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 19:59:38.642 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:07:12.929 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 20:07:22.185 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 20:07:22.187 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:07:22.212 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 20:07:22.378 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 20:07:22.379 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 20:07:22.382 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 20:07:22.383 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 20:07:22.384 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:07:22.480 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 20:07:22.485 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:07:30.907 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 20:07:30.911 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:08:04.164 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/ from 192.168.110.32
+2025-11-12 20:08:04.165 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:08:04.192 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://192.168.110.29:8000/auth/login from 192.168.110.32
+2025-11-12 20:08:04.301 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=0123456789, ip=192.168.110.32
+2025-11-12 20:08:04.301 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user '0123456789' (ID: 34) from 192.168.110.32
+2025-11-12 20:08:04.303 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 20:08:04.303 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-12 20:08:04.304 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:08:04.476 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 20:08:04.479 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:08:07.376 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 20:08:07.380 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:08:08.710 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 20:08:08.714 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:08:58.692 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:08:58.696 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:08:58.696 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:08:58.696 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:08:58.698 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:09:13.108 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 20:09:13.108 | INFO     | backend_src.app.main:log_requests:88 - Response status: 403
+2025-11-12 20:09:16.140 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 20:09:16.141 | INFO     | backend_src.app.main:log_requests:88 - Response status: 403
+2025-11-12 20:09:20.516 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 20:09:20.517 | INFO     | backend_src.app.main:log_requests:88 - Response status: 403
+2025-11-12 20:09:22.992 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:09:22.997 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:09:22.997 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:09:22.997 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:09:22.998 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:10:23.152 | INFO     | backend_src.app.main:log_requests:85 - Request: GET http://192.168.110.29:8000/attendance/employee/34 from 192.168.110.32
+2025-11-12 20:10:23.156 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 20:42:37.906 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 20:42:46.725 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:42:46.764 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:42:46.765 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:42:46.765 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:42:46.768 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:43:06.167 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:43:06.172 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:43:06.172 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:43:06.172 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:43:06.174 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:43:08.403 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:43:08.407 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:43:08.407 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:43:08.408 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:43:08.409 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:51:05.265 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:51:05.270 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:51:05.270 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:51:05.271 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:51:05.274 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:51:26.544 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:51:26.549 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:51:26.549 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:51:26.549 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:51:26.552 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:56:39.113 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 20:56:47.893 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:56:47.931 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:56:47.931 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:56:47.931 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:56:47.933 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 20:57:14.661 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 20:57:14.665 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 20:57:14.666 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 20:57:14.666 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 20:57:14.668 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:07:29.065 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 21:07:39.531 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:07:39.569 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:07:39.569 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:07:39.569 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:07:39.571 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:08:01.225 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:08:01.232 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:08:01.232 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:08:01.232 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:08:01.235 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:15:13.269 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:15:13.276 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:15:13.276 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:15:13.277 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:15:13.278 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:15:28.155 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:15:28.158 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:15:28.158 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:15:28.158 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:15:28.159 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:15:41.461 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:15:41.465 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:15:41.465 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:15:41.466 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:15:41.468 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:15:51.040 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:15:51.052 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:15:51.053 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:15:51.054 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:15:51.057 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:15:56.506 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:15:56.511 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:15:56.511 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:15:56.511 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:15:56.513 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:16:10.774 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:16:10.777 | WARNING  | backend_src.app.main:rate_limit_handler:61 - Rate limit exceeded for 127.0.0.1
+2025-11-12 21:16:10.777 | INFO     | backend_src.app.main:log_requests:88 - Response status: 429
+2025-11-12 21:16:15.709 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:16:15.713 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:16:15.713 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:16:15.713 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:16:15.714 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:16:22.647 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:16:22.651 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:16:22.651 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:16:22.652 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:16:22.654 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:21:16.816 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 21:21:31.183 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:21:31.225 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:21:31.225 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:21:31.225 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:21:31.227 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:21:47.842 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:21:47.846 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:21:47.846 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:21:47.847 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:21:47.848 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:21:50.840 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:21:50.844 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:21:50.845 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:21:50.845 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:21:50.846 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:21:57.655 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:21:57.659 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:21:57.660 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:21:57.660 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:21:57.662 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:22:01.544 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:22:01.548 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN FAILED: user=testuser, ip=127.0.0.1
+2025-11-12 21:22:01.549 | WARNING  | backend_src.app.security:log_login_attempt:352 - Failed login attempt for user testuser from 127.0.0.1
+2025-11-12 21:22:01.549 | WARNING  | backend_src.app.routers.auth:login:97 - Failed login attempt for user 'testuser' from 127.0.0.1
+2025-11-12 21:22:01.550 | INFO     | backend_src.app.main:log_requests:88 - Response status: 401
+2025-11-12 21:22:10.445 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:22:10.448 | WARNING  | backend_src.app.main:rate_limit_handler:61 - Rate limit exceeded for 127.0.0.1
+2025-11-12 21:22:10.448 | INFO     | backend_src.app.main:log_requests:88 - Response status: 429
+2025-11-12 21:28:10.367 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:28:10.608 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:28:10.608 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:28:10.609 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:28:10.613 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:28:23.307 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:28:23.520 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:28:23.521 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:28:23.521 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:28:23.524 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:28:26.048 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:28:26.262 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:28:26.262 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:28:26.263 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:28:26.265 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:28:58.303 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:28:58.521 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:28:58.521 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:28:58.521 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:28:58.524 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:13.025 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:31:13.248 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:31:13.248 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:31:13.249 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:31:13.252 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:24.852 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 21:31:24.860 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:28.227 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 21:31:28.230 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:31.211 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 21:31:31.213 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:35.717 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 21:31:35.719 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:39.550 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 21:31:39.553 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:50.356 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 21:31:50.358 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:31:54.402 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:31:54.617 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:31:54.617 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:31:54.617 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:31:54.620 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:42:12.114 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-12 21:42:18.111 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:42:18.379 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:42:18.380 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:42:18.380 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:42:18.386 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:42:53.421 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:42:53.635 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:42:53.636 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:42:53.636 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:42:53.639 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:47:55.355 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:47:55.566 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:47:55.567 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:47:55.567 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:47:55.570 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:48:08.838 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-12 21:48:08.842 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-12 21:48:14.383 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-12 21:48:14.616 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-12 21:48:14.616 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-12 21:48:14.617 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-12 21:48:14.620 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 12:28:28.799 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: ../wwwroot/photos
+2025-11-13 12:30:58.981 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 12:30:59.331 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 12:30:59.331 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 12:30:59.332 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 12:30:59.336 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 12:31:09.801 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-13 12:31:09.810 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 12:31:12.080 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 12:31:12.294 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 12:31:12.294 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 12:31:12.294 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 12:31:12.297 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 12:31:21.245 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 12:31:21.458 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 12:31:21.459 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 12:31:21.459 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 12:31:21.462 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:27:07.669 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:27:07.908 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:27:07.908 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:27:07.909 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:27:07.914 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:27:33.138 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:27:33.361 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:27:33.361 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:27:33.362 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:27:33.365 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:31:52.110 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:31:52.339 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:31:52.339 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:31:52.340 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:31:52.343 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:32:16.104 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:32:16.319 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:32:16.319 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:32:16.319 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:32:16.323 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:32:19.912 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:32:20.118 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:32:20.118 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:32:20.119 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:32:20.121 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:32:34.328 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:32:34.545 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:32:34.545 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:32:34.545 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:32:34.548 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:34:27.579 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:34:27.829 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:34:27.829 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:34:27.830 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:34:27.834 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:34:47.358 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:34:47.799 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:34:47.802 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:34:47.804 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:34:47.816 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:37:21.044 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:37:21.260 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:37:21.260 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:37:21.260 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:37:21.263 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:37:45.969 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:37:46.187 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:37:46.191 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:37:46.191 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:37:46.194 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:40:51.824 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:40:52.095 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:40:52.095 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:40:52.096 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:40:52.099 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:41:00.338 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-13 13:41:00.342 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:41:04.250 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-13 13:41:04.252 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:41:09.983 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:41:10.206 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:41:10.206 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:41:10.206 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:41:10.210 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:47:54.901 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:47:55.116 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:47:55.116 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:47:55.117 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:47:55.120 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:48:06.227 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-13 13:48:06.230 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-13 13:48:11.751 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-13 13:48:11.965 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-13 13:48:11.965 | INFO     | backend_src.app.routers.auth:login:112 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-13 13:48:11.966 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: Neither 'InstrumentedAttribute' object nor 'Comparator' object associated with Employee._phone has an attribute 'encode'
+2025-11-13 13:48:11.969 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200

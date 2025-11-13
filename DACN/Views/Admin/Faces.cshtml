@@ -1,23 +1,82 @@
 @{
     ViewBag.Title = "Quản lý khuôn mặt";
 }
-<h2>Quản lý khuôn mặt</h2>
-<div>
-    <button id="btnReload" class="btn btn-primary">Tải lại danh sách</button>
-    <button id="btnAdd" class="btn btn-success">Thêm khuôn mặt mới</button>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-6 fw-bold">
+            <i class="bi bi-person-bounding-box text-primary"></i> Quản lý khuôn mặt
+        </h1>
+        <p class="text-muted">Danh sách nhân viên đã đăng ký khuôn mặt</p>
+    </div>
 </div>
-<br />
-<table class="table table-bordered" id="facesTable">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tên</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
+
+<div class="card shadow">
+    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <h5 class="mb-0 text-white">
+            <i class="bi bi-list-ul"></i> Danh sách khuôn mặt đã đăng ký
+        </h5>
+    </div>
+    <div class="card-body">
+        @if (ViewBag.EmployeesWithFaces != null && ViewBag.EmployeesWithFaces.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Ảnh</th>
+                            <th>Tên nhân viên</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var emp in ViewBag.EmployeesWithFaces)
+                        {
+                            <tr>
+                                <td>@emp.Id</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(emp.PhotoPath))
+                                    {
+                                        <img src="@emp.PhotoPath" alt="@emp.Name" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="avatar-circle bg-primary text-white" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                            @emp.Name.Substring(0, 1)
+                                        </div>
+                                    }
+                                </td>
+                                <td>@emp.Name</td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Đã đăng ký
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/Employees/Details/@emp.Id" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Xem
+                                    </a>
+                                    <a href="/Employees/Edit/@emp.Id" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Chưa có nhân viên nào đăng ký khuôn mặt.
+                <a href="/Employees/Index" class="alert-link">Đi đến danh sách nhân viên</a> để thêm khuôn mặt.
+            </div>
+        }
+    </div>
+</div>
 
 <!-- Modal thêm/sửa -->
 <div class="modal fade" id="faceModal" tabindex="-1" role="dialog">

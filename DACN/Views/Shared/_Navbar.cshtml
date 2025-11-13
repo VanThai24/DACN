@@ -7,7 +7,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Employees">
+                <a class="nav-link d-flex align-items-center gap-1" href="/Employees/Index">
                     <i class="bi bi-people"></i> Nhân viên
                 </a>
             </li>
@@ -17,17 +17,17 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Admin/Devices">
+                <a class="nav-link d-flex align-items-center gap-1" href="/Devices/Index">
                     <i class="bi bi-cpu"></i> Thiết bị
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Admin/Attendance">
+                <a class="nav-link d-flex align-items-center gap-1" href="/Attendance/Index">
                     <i class="bi bi-calendar-check"></i> Điểm danh
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Admin/Shifts">
+                <a class="nav-link d-flex align-items-center gap-1" href="/Shifts/Index">
                     <i class="bi bi-clock-history"></i> Ca làm
                 </a>
             </li>
@@ -36,8 +36,17 @@
                     <i class="bi bi-person-bounding-box"></i> Quản lý khuôn mặt
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-1" href="/Users">
+                    <i class="bi bi-person-gear"></i> Người dùng
+                </a>
+            </li>
         </ul>
-        <span class="navbar-text ms-3">
+        <span class="navbar-text ms-3 d-flex align-items-center gap-3">
+            <span class="badge bg-light text-dark px-3 py-2">
+                <i class="bi bi-person-circle"></i> @Context.Session.GetString("User") 
+                <small>(@Context.Session.GetString("UserRole"))</small>
+            </span>
             <a class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm" href="/Account/Logout">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
             </a>

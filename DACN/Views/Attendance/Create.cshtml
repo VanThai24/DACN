@@ -1,0 +1,29 @@
+@model Models.AttendanceRecord
+@{
+    ViewBag.Title = "Thêm điểm danh";
+}
+<h2>Thêm điểm danh</h2>
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="EmployeeId">Nhân viên</label>
+        <input asp-for="EmployeeId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="TimestampIn">Thời gian vào</label>
+        <input asp-for="TimestampIn" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Status">Trạng thái</label>
+        <input asp-for="Status" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="PhotoPath">Ảnh</label>
+        <input asp-for="PhotoPath" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="DeviceId">Thiết bị</label>
+        <input asp-for="DeviceId" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>

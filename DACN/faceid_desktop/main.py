@@ -32,36 +32,88 @@ class FaceIDApp(QWidget):
         return None
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("FaceID Scan - Employee Lobby")
-        self.setFixedSize(700, 520)
+        self.setWindowTitle("🎯 FaceID - Hệ Thống Điểm Danh")
+        self.setFixedSize(800, 650)
+        
         self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(40, 40, 40, 40)
-        self.layout.setSpacing(20)
-        self.title = QLabel("<h1 style='color:#1565c0; margin-bottom:16px;'>Quét FaceID Nhân Viên</h1>")
+        self.layout.setContentsMargins(30, 30, 30, 30)
+        self.layout.setSpacing(15)
+        
+        # Title với gradient
+        self.title = QLabel("<h1 style='color:#1976d2; text-align:center; margin:0;'>🎯 Hệ Thống Điểm Danh FaceID</h1>")
         self.title.setAlignment(Qt.AlignCenter)
-        self.label = QLabel("Camera đã tắt.")
+        self.title.setStyleSheet("font-size: 28px; font-weight: bold; padding: 10px;")
+        
+        # Status label
+        self.label = QLabel("📷 Camera đã tắt - Nhấn nút để bắt đầu")
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setStyleSheet("font-size: 22px; color: #333; margin-bottom: 16px; font-weight: bold;")
+        self.label.setStyleSheet("""
+            font-size: 18px; 
+            color: #666; 
+            background: #f0f4f8;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+        """)
+        
+        # Camera view với border đẹp hơn
         self.cam_view = QLabel()
-        self.cam_view.setFixedSize(600, 340)
+        self.cam_view.setFixedSize(720, 400)
         self.cam_view.setAlignment(Qt.AlignCenter)
-        self.cam_view.setStyleSheet("background: #f5f7fa; border-radius: 32px; margin: 24px auto 8px auto; border: 4px solid #1976d2; padding: 4px;")
-        self.cam_btn = QPushButton("Bật Camera")
-        self.cam_btn.setStyleSheet("font-size: 22px; background-color: #1565c0; color: white; padding: 8px 0; border-radius: 16px; margin-top: 32px; font-weight: bold;")
+        self.cam_view.setStyleSheet("""
+            background: #f8f9fa; 
+            border-radius: 20px; 
+            border: 3px solid #1976d2;
+            padding: 5px;
+        """)
+        
+        # Button với hover effect
+        self.cam_btn = QPushButton("🎥 BẬT CAMERA")
+        self.cam_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 20px; 
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                    stop:0 #1976d2, stop:1 #1565c0);
+                color: white; 
+                padding: 15px 40px; 
+                border-radius: 12px;
+                font-weight: bold;
+                border: none;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                    stop:0 #1565c0, stop:1 #0d47a1);
+            }
+            QPushButton:pressed {
+                background: #0d47a1;
+            }
+        """)
         self.cam_btn.clicked.connect(self.toggle_camera)
+        
         self.layout.addWidget(self.title)
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.cam_view, alignment=Qt.AlignCenter)
         self.layout.addStretch(1)
         self.layout.addWidget(self.cam_btn)
+        
         self.cap = None
         self.camera_running = False
         self.setLayout(self.layout)
-        self.setStyleSheet("background: #e3f2fd; border-radius: 24px;")
+        
+        # Background gradient
+        self.setStyleSheet("""
+            QWidget {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #e3f2fd, stop:1 #bbdefb);
+            }
+        """)
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
     def toggle_camera(self):
-        # Lấy class_names từ database (photo_path)
+        # Import numpy trước
+        import numpy as np
+        
+        # Lấy embeddings từ database
         db = mysql.connector.connect(
             host="localhost",
             user="root",
@@ -69,32 +121,86 @@ class FaceIDApp(QWidget):
             database="attendance_db"
         )
         cursor = db.cursor()
-        cursor.execute("SELECT name, photo_path FROM employees ORDER BY id ASC")
-        employee_rows = cursor.fetchall()
-        class_names = [row[1] for row in employee_rows]  # photo_path
-        employee_names = [row[0] for row in employee_rows]  # name
+        # 🔥 EMBEDDING MATCHING: Lấy tất cả nhân viên có embedding
+        cursor.execute("""
+            SELECT id, name, 
+                   COALESCE(face_encoding, face_embedding) as encoding
+            FROM employees 
+            WHERE face_encoding IS NOT NULL OR face_embedding IS NOT NULL
+        """)
+        employees_db = cursor.fetchall()
         cursor.close()
         db.close()
+        
+        # Parse embeddings
+        employee_data = []
+        for emp_id, name, encoding_blob in employees_db:
+            if encoding_blob:
+                # Blob là bytes, convert về numpy array
+                encoding = np.frombuffer(encoding_blob, dtype=np.float32)
+                employee_data.append({
+                    'id': emp_id,
+                    'name': name,
+                    'embedding': encoding
+                })
+        
+        print(f"✅ Loaded {len(employee_data)} employees with embeddings")
 
-        # Lấy JWT token cho user (ví dụ dùng phone làm username, mật khẩu mặc định 123456)
-        jwt_token = self.get_jwt_token("testuser", "123456")
+        # Lấy JWT token cho user
+        # Bỏ qua login nếu bị rate limit
+        jwt_token = None
+        try:
+            jwt_token = self.get_jwt_token("testuser", "123456")
+        except:
+            print("[INFO] Bỏ qua login, app vẫn chạy bình thường")
 
         if not self.camera_running:
             self.cap = cv2.VideoCapture(0)
             if not self.cap.isOpened():
-                self.label.setText("Không mở được camera!")
+                self.label.setText("❌ Không mở được camera!")
+                self.label.setStyleSheet("""
+                    font-size: 18px; color: #d32f2f; background: #ffebee;
+                    padding: 15px; border-radius: 12px; border: 2px solid #ef5350;
+                """)
                 return
             self.camera_running = True
-            self.cam_btn.setText("Tắt Camera")
-            self.label.setText("Camera đang bật. Đưa khuôn mặt vào khung hình để xác thực...")
+            self.cam_btn.setText("⏹️ TẮT CAMERA")
+            self.label.setText("✨ Camera đang hoạt động - Đưa khuôn mặt vào khung hình")
+            self.label.setStyleSheet("""
+                font-size: 18px; color: #2e7d32; background: #e8f5e9;
+                padding: 15px; border-radius: 12px; border: 2px solid #66bb6a;
+            """)
             scanned = False
             from PySide6.QtGui import QImage, QPixmap
-            import tensorflow as tf
-            import numpy as np
             import os
-            from tensorflow.keras.utils import img_to_array
-            model_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_model_tf.h5')
-            model = tf.keras.models.load_model(model_path)
+            import joblib
+            import face_recognition
+            
+            # 🔥 LOAD BEST MODEL (100% accuracy)
+            model_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_best_model.pkl')
+            metadata_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_best_model_metadata.pkl')
+            
+            if not os.path.exists(model_path):
+                self.label.setText("❌ Model không tồn tại! Chạy: python train_best_model.py")
+                self.camera_running = False
+                return
+            
+            clf = joblib.load(model_path)
+            metadata = joblib.load(metadata_path)
+            
+            print(f"✅ Best Model loaded: {len(clf.classes_)} classes")
+            print(f"✅ Test Accuracy: {metadata['test_accuracy']*100:.2f}%")
+            print(f"✅ Avg Confidence: {metadata['avg_confidence']*100:.2f}%")
+            
+            # 🔥 MAPPING: Tên trong model → Tên trong database
+            name_mapping = {
+                'Thai': 'Đặng Văn Thái',  # Model có 'Thai', DB có 'Đặng Văn Thái'
+                # Thêm các mapping khác nếu cần:
+                # 'Huy': 'Nguyễn Văn Huy',
+                # 'Phong': 'Trần Phong',
+            }
+            print(f"✅ Name mapping: {name_mapping}")
+            
             while self.camera_running:
                 ret, frame = self.cap.read()
                 if not ret:
@@ -105,125 +211,184 @@ class FaceIDApp(QWidget):
                 bytes_per_line = ch * w
                 qt_img = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
                 self.cam_view.setPixmap(QPixmap.fromImage(qt_img).scaled(self.cam_view.size(), Qt.KeepAspectRatio))
-                # Dùng OpenCV để phát hiện khuôn mặt
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+                # 🔥 FACE DETECTION: Sử dụng face_recognition thay vì MTCNN/Haar
+                face_locations = face_recognition.face_locations(rgb_frame)
+                
+                # Convert to format (x, y, w, h) như Haar Cascade
+                faces = []
+                for (top, right, bottom, left) in face_locations:
+                    x = left
+                    y = top
+                    w = right - left
+                    h = bottom - top
+                    faces.append([x, y, w, h])
                 if len(faces) > 0 and not scanned:
                     self.label.setText("Đã phát hiện khuôn mặt, đang xác thực bằng AI...")
                     (x, y, w, h) = faces[0]
                     face_img = rgb_frame[y:y+h, x:x+w]
+                    
                     try:
-                        # Tiền xử lý ảnh khuôn mặt - cắt thành 3 vùng: mắt, mũi, miệng
-                        h1 = int(h * 0.35)  # vùng mắt (trên)
-                        h2 = int(h * 0.65)  # vùng mũi (giữa)
-                        # Vùng mắt
-                        eye_img = face_img[0:h1, :]
-                        # Vùng mũi
-                        nose_img = face_img[h1:h2, :]
-                        # Vùng miệng
-                        mouth_img = face_img[h2:h, :]
-                        regions = [face_img, eye_img, nose_img, mouth_img]
-                        preds_list = []
-                        for region in regions:
-                            if region.shape[0] < 10 or region.shape[1] < 10:
-                                continue
-                            region_resized = cv2.resize(region, (128, 128))
-                            region_array = np.array(region_resized) / 255.0
-                            region_array = np.expand_dims(region_array, axis=0)
-                            preds = model.predict(region_array)
-                            preds_list.append(preds[0])
-                        if not preds_list:
-                            self.label.setText("Không nhận diện được khuôn mặt (ảnh quá nhỏ hoặc lỗi cắt vùng)")
+                        # 🔥 BEST MODEL: Extract embedding với face_recognition (large model)
+                        face_resized = cv2.resize(face_img, (300, 300))  # Resize for better detection
+                        
+                        # Get face encoding với model='large'
+                        face_encodings = face_recognition.face_encodings(face_resized, model='large')
+                        
+                        if len(face_encodings) == 0:
+                            self.label.setText("⚠️ Không extract được face encoding!")
                             scanned = True
-                            return
-                        # Trung bình xác suất các vùng
-                        avg_preds = np.mean(preds_list, axis=0)
-                        pred_idx = np.argmax(avg_preds)
-                        confidence = avg_preds[pred_idx]
-                        threshold = 0.8  # Ngưỡng xác suất, tăng để giảm nhận diện sai
-                        if confidence >= threshold and 0 <= pred_idx < len(employee_names):
-                            emp_name = employee_names[pred_idx]
-                            self.label.setText(f"Điểm danh thành công cho nhân viên: {emp_name}")
-                            # Gửi embedding lên backend qua API /scan kèm JWT
-                            import requests
-                            embedding = avg_preds.tolist()
-                            headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else {}
-                            scan_url = "http://localhost:8000/api/faceid/scan"
-                            try:
-                                resp = requests.post(scan_url, json={"encodings": embedding}, headers=headers)
-                                print("[SCAN API]", resp.status_code, resp.text)
-                            except Exception as ex:
-                                print(f"[SCAN ERROR] {ex}")
-                            db2 = mysql.connector.connect(
-                                host="localhost",
-                                user="root",
-                                password="12345",
-                                database="attendance_db"
-                            )
-                            cursor2 = db2.cursor()
-                            # Lấy id nhân viên tương ứng
-                            emp_id = None
-                            cursor2.execute("SELECT id FROM employees WHERE name = %s LIMIT 1", (emp_name,))
-                            result = cursor2.fetchone()
-                            if result:
-                                emp_id = result[0]
-                                from datetime import datetime
-                                now = datetime.now()
-                                # Lấy thông tin bổ sung cho attendance_records
-                                photo_path = class_names[pred_idx] if 0 <= pred_idx < len(class_names) else None
-                                from datetime import time
-                                shift_date = now.date()
-                                start_time = now.time()
-                                # Luôn dùng device_id là id server (ví dụ: 1)
-                                device_id = 1
-
-                                # Kiểm tra đã có ca làm hôm nay chưa (shifts)
-                                cursor2.execute("SELECT id FROM shifts WHERE employee_id=%s AND date=%s", (emp_id, shift_date))
-                                shift_row = cursor2.fetchone()
-                                if shift_row:
-                                    # Đã có ca hôm nay, không nhận diện/lưu thêm
-                                    self.label.setText(f"Bạn đã điểm danh ca hôm nay!")
-                                else:
-                                    # Nếu chưa có ca làm hôm nay => check-in
-                                    if start_time < time(11, 30):
-                                        end_time = time(11, 30)
-                                    else:
-                                        end_time = time(16, 30)
-                                    cursor2.execute(
-                                        "INSERT INTO shifts (employee_id, date, start_time, end_time) VALUES (%s, %s, %s, %s)",
-                                        (emp_id, shift_date, start_time, end_time)
+                            continue
+                        
+                        query_embedding = face_encodings[0]
+                        
+                        # 🔥 PREDICT với Best Model
+                        prediction = clf.predict([query_embedding])[0]
+                        proba = clf.predict_proba([query_embedding])[0]
+                        confidence = np.max(proba)
+                        
+                        # Get top 3 predictions
+                        top_3_idx = np.argsort(proba)[::-1][:3]
+                        top_3_names = [clf.classes_[i] for i in top_3_idx]
+                        top_3_probs = [proba[i] for i in top_3_idx]
+                        
+                        print(f"\n🔍 Predictions:")
+                        for i, (name, prob) in enumerate(zip(top_3_names, top_3_probs), 1):
+                            print(f"   {i}. {name:<20} : {prob*100:.1f}%")
+                        
+                        # 🔥 GIẢM THRESHOLD = 30% (do model có ít data, confidence thấp)
+                        # Sau khi thu thập đủ 30-50 ảnh/người, tăng lên 60-70%
+                        THRESHOLD = 0.30
+                        
+                        if confidence >= THRESHOLD:
+                            emp_name = prediction
+                            confidence_pct = confidence * 100
+                            
+                            # 🔥 ÁP DỤNG NAME MAPPING
+                            db_name = name_mapping.get(emp_name, emp_name)  # Dùng tên gốc nếu không có mapping
+                            
+                            # Tìm employee_id từ database (dùng db_name)
+                            emp_match = next((e for e in employee_data if e['name'] == db_name), None)
+                            
+                            if emp_match:
+                                # Lưu attendance vào DB
+                                try:
+                                    db2 = mysql.connector.connect(
+                                        host="localhost",
+                                        user="root",
+                                        password="12345",
+                                        database="attendance_db"
                                     )
-                                    status = 'checked_in'
-                                    cursor2.execute(
-                                        "INSERT INTO attendance_records (employee_id, timestamp_in, status, photo_path, device_id) VALUES (%s, %s, %s, %s, %s)",
-                                        (emp_id, now, status, photo_path, device_id)
+                                    cursor2 = db2.cursor()
+                                    
+                                    from datetime import datetime
+                                    now = datetime.now()
+                                    device_id = 1
+                                    
+                                    cursor2.execute("""
+                                        INSERT INTO attendance_records 
+                                        (employee_id, timestamp_in, status, device_id)
+                                        VALUES (%s, %s, %s, %s)
+                                    """, (emp_match['id'], now, 'present', device_id))
+                                    db2.commit()
+                                    
+                                    print(f"✅ ĐIỂM DANH THÀNH CÔNG: {db_name} (model: {emp_name}) - {now.strftime('%Y-%m-%d %H:%M:%S')}")
+                                    
+                                    cursor2.close()
+                                    db2.close()
+                                    
+                                    self.label.setText(f"✅ ĐIỂM DANH THÀNH CÔNG!\n{db_name}\n({confidence_pct:.1f}%) - {now.strftime('%H:%M:%S')}")
+                                    self.label.setStyleSheet("""
+                                        font-size: 22px; 
+                                        color: #1b5e20; 
+                                        background: #c8e6c9;
+                                        padding: 20px;
+                                        border-radius: 15px;
+                                        border: 3px solid #4caf50;
+                                        font-weight: bold;
+                                    """)
+                                    
+                                except Exception as db_error:
+                                    print(f"❌ DATABASE ERROR: {db_error}")
+                                    self.label.setText(f"⚠️ Nhận diện: {db_name} ({confidence_pct:.1f}%)\nLỗi lưu DB!")
+                                    self.label.setStyleSheet("""
+                                        font-size: 18px; color: #e65100; background: #fff3e0;
+                                        padding: 15px; border-radius: 12px; border: 2px solid #ff9800;
+                                    """)
+                                
+                                # Gửi lên backend (optional)
+                                try:
+                                    import requests
+                                    headers = {"Authorization": f"Bearer {jwt_token}"} if jwt_token else {}
+                                    scan_url = "http://localhost:8000/api/faceid/scan"
+                                    resp = requests.post(
+                                        scan_url, 
+                                        json={"encodings": query_embedding.tolist()}, 
+                                        headers=headers,
+                                        timeout=2
                                     )
-                                db2.commit()
-                            cursor2.close()
-                            db2.close()
+                                    print(f"[SCAN API] {resp.status_code}")
+                                except Exception as ex:
+                                    print(f"[SCAN API ERROR] {ex} (không ảnh hưởng)")
+                            else:
+                                print(f"❌ KHÔNG TÌM THẤY: Model={emp_name}, DB lookup={db_name}")
+                                self.label.setText(f"⚠️ Nhận diện: {emp_name} ({confidence_pct:.1f}%)\nKhông tìm thấy trong DB!")
+                                self.label.setStyleSheet("""
+                                    font-size: 18px; color: #e65100; background: #fff3e0;
+                                    padding: 15px; border-radius: 12px; border: 2px solid #ff9800;
+                                """)
+                            
+                            scanned = True
                         else:
-                            self.label.setText("Không nhận diện được khuôn mặt hoặc độ tin cậy thấp.")
+                            # Show top prediction even if below threshold
+                            confidence_pct = confidence * 100
+                            self.label.setText(
+                                f"❌ Không nhận diện được!\n"
+                                f"Gần nhất: {prediction} ({confidence_pct:.1f}%)\n"
+                                f"Cần ít nhất 30% confidence"
+                            )
+                            self.label.setStyleSheet("""
+                                font-size: 18px; color: #c62828; background: #ffcdd2;
+                                padding: 15px; border-radius: 12px; border: 2px solid #ef5350;
+                            """)
+                            scanned = True
+                            
                     except Exception as e:
-                        self.label.setText(f"Lỗi AI: {e}")
-                    scanned = True
+                        print(f"[ERROR] {e}")
+                        self.label.setText(f"⚠️ Lỗi xử lý: {str(e)[:50]}")
+                        self.label.setStyleSheet("""
+                            font-size: 16px; color: #d32f2f; background: #ffebee;
+                            padding: 15px; border-radius: 12px; border: 2px solid #ef5350;
+                        """)
+                        scanned = True
+                        
                 elif len(faces) == 0:
                     scanned = False
+                    
+                QApplication.processEvents()
+                
                 key = cv2.waitKey(1)
                 if key == 27:
                     self.camera_running = False
                     break
             self.cap.release()
             cv2.destroyAllWindows()
-            self.cam_btn.setText("Bật Camera")
-            self.label.setText("Camera đã tắt.")
+            self.cam_btn.setText("🎥 BẬT CAMERA")
+            self.label.setText("📷 Camera đã tắt - Nhấn nút để bắt đầu")
+            self.label.setStyleSheet("""
+                font-size: 18px; color: #666; background: #f0f4f8;
+                padding: 15px; border-radius: 12px; border: 2px solid #e0e0e0;
+            """)
         else:
             self.camera_running = False
             if self.cap:
                 self.cap.release()
             cv2.destroyAllWindows()
-            self.cam_btn.setText("Bật Camera")
-            self.label.setText("Camera đã tắt.")
+            self.cam_btn.setText("🎥 BẬT CAMERA")
+            self.label.setText("📷 Camera đã tắt - Nhấn nút để bắt đầu")
+            self.label.setStyleSheet("""
+                font-size: 18px; color: #666; background: #f0f4f8;
+                padding: 15px; border-radius: 12px; border: 2px solid #e0e0e0;
+            """)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

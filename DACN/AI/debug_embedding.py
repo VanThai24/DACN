@@ -7,9 +7,14 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import Sequential
 
+# Custom function cho L2 normalization
+def l2_normalize_func(x):
+    """L2 normalization function"""
+    return tf.nn.l2_normalize(x, axis=1)
+
 # 1. Load TensorFlow model
 model_path = r'D:\DACN\DACN\AI\faceid_model_tf.h5'
-full_model = tf.keras.models.load_model(model_path)
+full_model = tf.keras.models.load_model(model_path, custom_objects={'l2_normalize_func': l2_normalize_func})
 _ = full_model.predict(np.zeros((1, 128, 128, 3)), verbose=0)
 
 embedding_layers = full_model.layers[:-1]
@@ -27,7 +32,8 @@ for img_path, db_name, desc in test_cases:
     print(f"Query: {img_path}")
     print(f"DB: {db_name}")
     
-    img = image.load_img(img_path, target_size=(128, 128))
+    # Model được train với input size 160x160
+    img = image.load_img(img_path, target_size=(160, 160))
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     

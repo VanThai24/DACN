@@ -4,6 +4,7 @@ sqlalchemy
 alembic
 python-jose[cryptography]
 passlib[bcrypt]
+bcrypt==4.1.3
 pydantic
 pydantic-settings
 opencv-python

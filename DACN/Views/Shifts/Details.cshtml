@@ -1,0 +1,43 @@
+@model Models.ShiftViewModel
+@{
+    ViewBag.Title = "Chi tiết ca làm";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white">
+                <h2 class="mb-0">Chi tiết ca làm</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>ID:</strong></label>
+                    <span class="form-control-plaintext">@Model.Id</span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Nhân viên:</strong></label>
+                    <span class="form-control-plaintext">@Model.EmployeeName</span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Ngày:</strong></label>
+                    <span class="form-control-plaintext">@(Model.Date?.ToString("dd/MM/yyyy"))</span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Giờ bắt đầu:</strong></label>
+                    <span class="form-control-plaintext">@(Model.StartTime.HasValue ? Model.StartTime.Value.ToString(@"hh\:mm") : "")</span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Giờ kết thúc:</strong></label>
+                    <span class="form-control-plaintext">@(Model.EndTime.HasValue ? Model.EndTime.Value.ToString(@"hh\:mm") : "")</span>
+                </div>
+                <div class="mt-3">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Sửa
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

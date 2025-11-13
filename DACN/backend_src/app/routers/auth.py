@@ -82,9 +82,10 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
     """
     client_ip = request.client.host
     
-    # Sanitize input
+    # Sanitize username but NOT password
+    # Password will be hashed, should not be HTML encoded
     username = sanitize_html(request_data.username.strip())
-    password = sanitize_html(request_data.password)
+    password = request_data.password  # Keep password as-is for bcrypt
     
     try:
         # Find user

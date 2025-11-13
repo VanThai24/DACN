@@ -5,8 +5,11 @@
 <div class="row justify-content-center mt-4">
     <div class="col-md-10">
         <div class="card shadow">
-            <div class="card-header bg-warning text-dark">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                 <h2 class="mb-0">Danh sách điểm danh</h2>
+                <a asp-action="Create" class="btn btn-dark">
+                    <i class="bi bi-plus-circle"></i> Thêm mới
+                </a>
             </div>
             <div class="card-body">
                 <table class="table table-bordered table-hover">
@@ -15,10 +18,10 @@
                             <th>ID</th>
                             <th>Nhân viên</th>
                             <th>Check-in</th>
-                            <th>Check-out</th>
                             <th>Status</th>
                             <th>Photo</th>
                             <th>Device</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,10 +31,20 @@
                                 <td>@r.Id</td>
                                 <td>@r.EmployeeName</td>
                                 <td>@(r.TimestampIn?.ToString("dd/MM/yyyy HH:mm"))</td>
-                                <!-- Đã xóa thuộc tính TimestampOut khỏi model, bỏ cột này -->
                                 <td>@r.Status</td>
                                 <td>@r.PhotoPath</td>
                                 <td>@r.DeviceId</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@r.Id" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@r.Id" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
                             </tr>
                         }
                     </tbody>

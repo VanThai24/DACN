@@ -1,0 +1,26 @@
+@model Models.AttendanceRecordViewModel
+@{
+    ViewBag.Title = "Chi tiết điểm danh";
+}
+<h2>Chi tiết điểm danh</h2>
+<div class="form-group">
+    <label>Nhân viên</label>
+    <span>@Model.EmployeeName</span>
+</div>
+<div class="form-group">
+    <label>Thời gian vào</label>
+    <span>@Model.TimestampIn</span>
+</div>
+<div class="form-group">
+    <label>Trạng thái</label>
+    <span>@Model.Status</span>
+</div>
+<div class="form-group">
+    <label>Ảnh</label>
+    <span>@Model.PhotoPath</span>
+</div>
+<div class="form-group">
+    <label>Thiết bị</label>
+    <span>@Model.DeviceId</span>
+</div>
+<a asp-action="Index" class="btn btn-secondary">Quay lại</a>

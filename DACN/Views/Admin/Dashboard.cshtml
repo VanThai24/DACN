@@ -1,19 +1,346 @@
 @{
     ViewBag.Title = "Dashboard";
 }
-<div class="row justify-content-center mt-4">
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h2 class="mb-0">Dashboard</h2>
+
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5 fw-bold">
+            <i class="bi bi-speedometer2 text-primary"></i> Dashboard
+        </h1>
+        <p class="text-muted">Tổng quan hệ thống quản lý điểm danh</p>
+    </div>
+</div>
+    
+<!-- Thống kê tổng quan -->
+<div class="row mb-4 g-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-people"></i> Nhân viên
+                    </p>
+                    <h3 class="mb-0 fw-bold text-primary">@ViewBag.EmployeeCount</h3>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                     style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="bi bi-people-fill fs-3 text-white"></i>
+                </div>
             </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Tổng số nhân viên: <strong>@ViewBag.EmployeeCount</strong></li>
-                    <li class="list-group-item">Tổng số điểm danh: <strong>@ViewBag.AttendanceCount</strong></li>
-                    <li class="list-group-item">Tổng số báo cáo: <strong>@ViewBag.ReportCount</strong></li>
-                </ul>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar" role="progressbar" style="width: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-calendar-check"></i> Hôm nay
+                    </p>
+                    <h3 class="mb-0 fw-bold text-success">@ViewBag.TodayAttendance</h3>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                     style="width: 60px; height: 60px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <i class="bi bi-check-circle-fill fs-3 text-white"></i>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 75%;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-camera-video"></i> Thiết bị
+                    </p>
+                    <h3 class="mb-0 fw-bold text-info">@ViewBag.DeviceCount</h3>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                     style="width: 60px; height: 60px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <i class="bi bi-camera-fill fs-3 text-white"></i>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: 60%;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-muted mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-file-text"></i> Báo cáo
+                    </p>
+                    <h3 class="mb-0 fw-bold text-warning">@ViewBag.ReportCount</h3>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                     style="width: 60px; height: 60px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <i class="bi bi-file-earmark-text-fill fs-3 text-white"></i>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 45%;"></div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="row g-4">
+    <!-- Biểu đồ điểm danh 7 ngày -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="mb-0 text-white">
+                    <i class="bi bi-graph-up"></i> Thống kê điểm danh 7 ngày gần đây
+                </h5>
+            </div>
+            <div class="card-body" style="height: 350px;">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê theo phòng ban -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <h5 class="mb-0 text-white">
+                    <i class="bi bi-pie-chart"></i> Phòng ban
+                </h5>
+            </div>
+            <div class="card-body" style="height: 350px;">
+                <canvas id="departmentChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top nhân viên đi muộn -->
+<div class="row mt-4">
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h5 class="mb-0 text-white">
+                    <i class="bi bi-clock-history"></i> Top 5 nhân viên đi muộn gần đây
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    @foreach (var emp in ViewBag.LateEmployees)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-warning text-white me-3">
+                                    @emp.Name.Substring(0, 1)
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">@emp.Name</h6>
+                                    <small class="text-muted">Thời gian: @(emp.Time?.ToString("dd/MM/yyyy") ?? "N/A")</small>
+                                </div>
+                            </div>
+                            <span class="badge rounded-pill" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 0.5rem 1rem;">
+                                <i class="bi bi-clock"></i> @(emp.Time?.ToString("HH:mm") ?? "--:--")
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h5 class="mb-0 text-white">
+                    <i class="bi bi-lightning"></i> Thao tác nhanh
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="/Employees/Create" class="btn btn-lg btn-success">
+                        <i class="bi bi-person-plus-fill"></i> Thêm nhân viên mới
+                    </a>
+                    <a href="/Admin/Reports" class="btn btn-lg btn-primary">
+                        <i class="bi bi-file-earmark-text"></i> Tạo báo cáo
+                    </a>
+                    <a href="/Devices" class="btn btn-lg btn-info">
+                        <i class="bi bi-plus-circle"></i> Thêm thiết bị
+                    </a>
+                    <a href="/Attendance" class="btn btn-lg btn-warning">
+                        <i class="bi bi-calendar-check"></i> Xem điểm danh
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Biểu đồ điểm danh 7 ngày
+    var attendanceData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.DailyAttendance));
+    var attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+    
+    // Gradient cho line chart
+    var gradientFill = attendanceCtx.createLinearGradient(0, 0, 0, 300);
+    gradientFill.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
+    gradientFill.addColorStop(1, 'rgba(118, 75, 162, 0.05)');
+    
+    var attendanceChart = new Chart(attendanceCtx, {
+        type: 'line',
+        data: {
+            labels: attendanceData.map(d => d.Date),
+            datasets: [{
+                label: 'Số lượt điểm danh',
+                data: attendanceData.map(d => d.Count),
+                backgroundColor: gradientFill,
+                borderColor: 'rgba(102, 126, 234, 1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        padding: 20,
+                        font: { size: 12, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: { size: 11 },
+                        padding: 10
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: { size: 11, weight: '600' },
+                        padding: 10
+                    }
+                }
+            }
+        }
+    });
+
+    // Biểu đồ phòng ban
+    var departmentData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.DepartmentStats));
+    var departmentCtx = document.getElementById('departmentChart').getContext('2d');
+    var departmentChart = new Chart(departmentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: departmentData.map(d => d.Department || 'Chưa phân loại'),
+            datasets: [{
+                data: departmentData.map(d => d.Count),
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(17, 153, 142, 0.8)',
+                    'rgba(79, 172, 254, 0.8)',
+                    'rgba(240, 147, 251, 0.8)',
+                    'rgba(235, 51, 73, 0.8)',
+                ],
+                borderWidth: 3,
+                borderColor: '#fff',
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12, weight: '600' },
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    return {
+                                        text: `${label} (${value})`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        hidden: false,
+                                        index: i
+                                    };
+                                });
+                            }
+                            return [];
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            let value = context.parsed;
+                            let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            let percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+</style>

@@ -60,7 +60,7 @@ class AttendanceRecord(Base):
     employee_id = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, index=True)
     device_id = Column(Integer, ForeignKey("devices.id", ondelete="SET NULL"), nullable=True, index=True)
     timestamp_in = Column(DateTime, nullable=False, index=True)  # Index for date queries
-    timestamp_out = Column(DateTime, index=True)  # Index for date range queries
+    # timestamp_out = Column(DateTime, index=True)  # Removed - not in database schema
     status = Column(String(50), index=True)  # Index for status filtering
     photo_path = Column(String(255))
     employee = relationship("Employee", back_populates="attendance_records")

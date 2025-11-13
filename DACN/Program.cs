@@ -36,22 +36,5 @@ app.MapControllerRoute(
     pattern: "{controller=Admin}/{action=Dashboard}/{id?}")
     .WithStaticAssets();
 
-app.MapControllerRoute(
-    name: "devices",
-    pattern: "Admin/Devices/{action=Index}/{id?}",
-    defaults: new { controller = "Devices" });
-app.MapControllerRoute(
-    name: "attendance",
-    pattern: "Admin/Attendance/{action=Index}/{id?}",
-    defaults: new { controller = "Attendance" });
-app.MapControllerRoute(
-    name: "shifts",
-    pattern: "Admin/Shifts/{action=Index}/{id?}",
-    defaults: new { controller = "Shifts" });
-app.MapControllerRoute(
-    name: "employees",
-    pattern: "Employees/{action=Index}/{id?}",
-    defaults: new { controller = "Employees" });
-
 
 app.Run();

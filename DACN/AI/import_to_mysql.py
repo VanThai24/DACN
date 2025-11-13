@@ -8,16 +8,21 @@ from tensorflow.keras.applications.vgg16 import preprocess_input
 from tensorflow.keras.preprocessing import image
 from db import get_db_connection
 
+# Custom function cho L2 normalization
+def l2_normalize_func(x):
+    """L2 normalization function"""
+    return tf.nn.l2_normalize(x, axis=1)
+
 # Load model
 MODEL_PATH = 'faceid_model_tf.h5'
-model = tf.keras.models.load_model(MODEL_PATH)
+model = tf.keras.models.load_model(MODEL_PATH, custom_objects={'l2_normalize_func': l2_normalize_func})
 print(f"✅ Model loaded from {MODEL_PATH}")
 print(f"📊 Model layers: {len(model.layers)}")
 
 def get_embedding_from_model(img_path):
     """Trích xuất embedding 128-dim từ ảnh"""
-    # Model được train với input size 128x128
-    img = image.load_img(img_path, target_size=(128, 128))
+    # Model được train với input size 160x160 (không phải 128x128)
+    img = image.load_img(img_path, target_size=(160, 160))
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     

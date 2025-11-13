@@ -9,6 +9,11 @@ import sqlite3
 import os
 from pathlib import Path
 
+# Custom function cho L2 normalization
+def l2_normalize_func(x):
+    """L2 normalization function"""
+    return tf.nn.l2_normalize(x, axis=1)
+
 # Paths
 BASE_DIR = Path(__file__).parent
 MODEL_PATH = BASE_DIR / "faceid_model_tf.h5"
@@ -16,10 +21,10 @@ DB_PATH = BASE_DIR.parent / "backend_src" / "dacn.db"
 FACE_DATA_DIR = BASE_DIR / "face_data"
 
 print(f"🔧 Loading model from: {MODEL_PATH}")
-model = tf.keras.models.load_model(str(MODEL_PATH))
+model = tf.keras.models.load_model(str(MODEL_PATH), custom_objects={'l2_normalize_func': l2_normalize_func})
 
-# Build model để có input shape
-model.build((None, 128, 128, 3))
+# Build model để có input shape (160x160, không phải 128x128)
+model.build((None, 160, 160, 3))
 
 print("✅ Model loaded successfully")
 print(f"📏 Model output dimension: {model.output_shape[-1]}")
@@ -38,7 +43,8 @@ def get_embedding_from_model(img_array):
 def process_image(img_path):
     """Load and preprocess image for model"""
     try:
-        img = image.load_img(img_path, target_size=(128, 128))
+        # Model được train với input size 160x160
+        img = image.load_img(img_path, target_size=(160, 160))
         img_array = image.img_to_array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
         return img_array

@@ -40,7 +40,9 @@ async def general_exception_handler(request: Request, exc: Exception):
     """
     General exception handler for unhandled errors
     """
-    logger.error(f"Unhandled exception on {request.url.path}: {exc}", exc_info=True)
+    # Convert exception to string first to avoid loguru format string issues with curly braces
+    exc_str = str(exc).replace('{', '{{').replace('}', '}}')
+    logger.error(f"Unhandled exception on {request.url.path}: {exc_str}", exc_info=True)
     
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

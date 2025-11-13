@@ -1,0 +1,57 @@
+@model Models.Device
+@{
+    ViewBag.Title = "Chi tiết thiết bị";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h2 class="mb-0">Chi tiết thiết bị</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>ID:</strong></label>
+                    <span class="form-control-plaintext">@Model.Id</span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Tên:</strong></label>
+                    <span class="form-control-plaintext">@Model.Name</span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Vị trí:</strong></label>
+                    <span class="form-control-plaintext">@Model.Location</span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>API Key:</strong></label>
+                    <div class="input-group">
+                        <span class="form-control-plaintext font-monospace">@Model.ApiKey</span>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyApiKey()">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Last Seen:</strong></label>
+                    <span class="form-control-plaintext">@(Model.LastSeen?.ToString("dd/MM/yyyy HH:mm:ss"))</span>
+                </div>
+                <div class="mt-3">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Sửa
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyApiKey() {
+    const apiKey = '@Model.ApiKey';
+    navigator.clipboard.writeText(apiKey).then(() => {
+        alert('API Key đã được sao chép!');
+    });
+}
+</script>

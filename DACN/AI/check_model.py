@@ -4,10 +4,15 @@ Kiểm tra output shape của TensorFlow model
 import tensorflow as tf
 from pathlib import Path
 
+# Custom function cho L2 normalization
+def l2_normalize_func(x):
+    """L2 normalization function"""
+    return tf.nn.l2_normalize(x, axis=1)
+
 MODEL_PATH = Path(__file__).parent / "faceid_model_tf.h5"
 
 print(f"📂 Loading model: {MODEL_PATH}")
-model = tf.keras.models.load_model(str(MODEL_PATH))
+model = tf.keras.models.load_model(str(MODEL_PATH), custom_objects={'l2_normalize_func': l2_normalize_func})
 
 print("\n📊 Model Summary:")
 model.summary()

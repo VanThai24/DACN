@@ -103,8 +103,8 @@ async def add_face(
                 message="AI model not ready"
             )
         
-        # Tiền xử lý ảnh: resize về 128x128 (kích thước mô hình được huấn luyện) và chuẩn hóa
-        img_resized = cv2.resize(img, (128, 128))
+        # Tiền xử lý ảnh: resize về 160x160 (kích thước mô hình được huấn luyện) và chuẩn hóa
+        img_resized = cv2.resize(img, (160, 160))
         img_normalized = img_resized.astype('float32') / 255.0
         img_batch = np.expand_dims(img_normalized, axis=0)
         

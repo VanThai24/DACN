@@ -25,8 +25,17 @@ namespace Controllers
             var user = _context.Users.FirstOrDefault(u => u.Username == username);
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
-                HttpContext.Session.SetString("User", user.Username);
-                return Redirect("http://localhost:5280/Admin/Dashboard");
+                // Chỉ cho phép Admin và Manager đăng nhập
+                if (user.Role != "Admin" && user.Role != "Manager")
+                {
+                    ViewBag.Error = "Bạn không có quyền truy cập hệ thống Admin!";
+                    return View();
+                }
+
+                HttpContext.Session.SetString("User", user.Username ?? "");
+                HttpContext.Session.SetString("UserRole", user.Role ?? "User");
+                HttpContext.Session.SetInt32("UserId", user.Id);
+                return Redirect("/Admin/Dashboard");
             }
             ViewBag.Error = "Sai tài khoản hoặc mật khẩu";
             return View();
