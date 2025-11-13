@@ -280,23 +280,62 @@ class FaceIDApp(QWidget):
                                     )
                                     cursor2 = db2.cursor()
                                     
-                                    from datetime import datetime
+                                    from datetime import datetime, time
                                     now = datetime.now()
                                     device_id = 1
+                                    current_time = now.time()
+                                    current_date = now.date()
+                                    
+                                    # 🔥 TỰ ĐỘNG XÁC ĐỊNH CA LÀM VIỆC DựA VÀO GIỜ ĐIỂM DANH
+                                    # Ca sáng: 6:00 - 12:30 → Ca làm: 7:00 - 11:30
+                                    # Ca chiều: 12:30 - 23:59 → Ca làm: 13:00 - 16:30
+                                    if time(6, 0) <= current_time < time(12, 30):
+                                        shift_start = time(8, 30)
+                                        shift_end = time(11, 30)
+                                        shift_name = "Ca sáng"
+                                    else:  # Ca chiều/tối
+                                        shift_start = time(13, 30)
+                                        shift_end = time(16, 30)
+                                        shift_name = "Ca chiều"
+                                    
+                                    # Kiểm tra xem ca đã tồn tại chưa
+                                    cursor2.execute("""
+                                        SELECT id FROM shifts 
+                                        WHERE employee_id = %s 
+                                        AND DATE(date) = %s
+                                        AND start_time = %s
+                                        AND end_time = %s
+                                        LIMIT 1
+                                    """, (emp_match['id'], current_date, shift_start, shift_end))
+                                    existing_shift = cursor2.fetchone()
+                                    
+                                    if existing_shift:
+                                        shift_id = existing_shift[0]
+                                        print(f"✅ Sử dụng ca có sẵn: {shift_name} (ID: {shift_id})")
+                                    else:
+                                        # Tạo ca mới
+                                        cursor2.execute("""
+                                            INSERT INTO shifts (employee_id, date, start_time, end_time)
+                                            VALUES (%s, %s, %s, %s)
+                                        """, (emp_match['id'], current_date, shift_start, shift_end))
+                                        shift_id = cursor2.lastrowid
+                                        print(f"✅ Tạo ca mới: {shift_name} (ID: {shift_id})")
+                                    
+                                    shift_info = f"{shift_name}: {shift_start.strftime('%H:%M')}-{shift_end.strftime('%H:%M')}"
                                     
                                     cursor2.execute("""
                                         INSERT INTO attendance_records 
-                                        (employee_id, timestamp_in, status, device_id)
-                                        VALUES (%s, %s, %s, %s)
-                                    """, (emp_match['id'], now, 'present', device_id))
+                                        (employee_id, timestamp_in, status, device_id, shift_id)
+                                        VALUES (%s, %s, %s, %s, %s)
+                                    """, (emp_match['id'], now, 'present', device_id, shift_id))
                                     db2.commit()
                                     
-                                    print(f"✅ ĐIỂM DANH THÀNH CÔNG: {db_name} (model: {emp_name}) - {now.strftime('%Y-%m-%d %H:%M:%S')}")
+                                    print(f"✅ ĐIỂM DANH THÀNH CÔNG: {db_name} (model: {emp_name}) - {now.strftime('%Y-%m-%d %H:%M:%S')} - {shift_info}")
                                     
                                     cursor2.close()
                                     db2.close()
                                     
-                                    self.label.setText(f"✅ ĐIỂM DANH THÀNH CÔNG!\n{db_name}\n({confidence_pct:.1f}%) - {now.strftime('%H:%M:%S')}")
+                                    self.label.setText(f"✅ ĐIỂM DANH THÀNH CÔNG!\n{db_name}\n({confidence_pct:.1f}%) - {now.strftime('%H:%M:%S')}\n{shift_info}")
                                     self.label.setStyleSheet("""
                                         font-size: 22px; 
                                         color: #1b5e20; 

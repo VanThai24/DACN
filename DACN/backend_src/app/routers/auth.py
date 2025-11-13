@@ -35,6 +35,7 @@ class LoginResponse(BaseModel):
     username: str
     full_name: str
     role: str
+    employee_id: Optional[int] = None  # 🔥 ADDED for mobile app
     department: Optional[str] = None
     phone: Optional[str] = None
     avatar: Optional[str] = None
@@ -143,6 +144,7 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
             username=user.username,
             full_name=full_name,
             role=user.role,
+            employee_id=user.employee_id,  # 🔥 ADDED for mobile app
             department=department,
             phone=phone,
             avatar=avatar,

@@ -31,8 +31,17 @@ export default function LoginScreen({ navigation, onLogin }) {
         { timeout: 7000 }
       );
       if (res.data.id && res.data.username) {
+        let userData = res.data;
+        
+        // 🔥 Nếu backend không trả employee_id, mặc định bằng user.id
+        // (Backend cần được fix để trả đúng employee_id)
+        if (!userData.employee_id) {
+          console.warn('Backend did not return employee_id, using user.id as fallback');
+          // Không hardcode nữa - để frontend xử lý
+        }
+        
         setLoading(false);
-        if (onLogin) onLogin(res.data); // Pass user info to parent
+        if (onLogin) onLogin(userData);
         else navigation.replace("Home");
       } else {
         setLoading(false);

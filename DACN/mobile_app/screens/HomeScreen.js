@@ -39,14 +39,20 @@ export default function HomeScreen({ user, navigation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.employee_id) {
+      console.log('No employee_id in user:', user);
+      return;
+    }
+    console.log('Fetching attendance for employee_id:', user.employee_id);
     setLoading(true);
-    axios.get(`${API_URL}/attendance/employee/${user.id}`)
+    axios.get(`${API_URL}/attendance/employee/${user.employee_id}`)
       .then(res => {
+        console.log('HomeScreen attendance data:', res.data);
         setRecords(res.data);
         setLoading(false);
       })
-      .catch(() => {
+      .catch(err => {
+        console.error('HomeScreen fetch error:', err);
         setRecords([]);
         setLoading(false);
       });

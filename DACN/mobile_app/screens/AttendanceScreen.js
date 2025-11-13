@@ -87,10 +87,20 @@ export default function AttendanceScreen({ user }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const fetchRecords = () => {
-    if (!user?.id) return;
-    axios.get(`${API_URL}/attendance/employee/${user.id}`)
-      .then(res => setRecords(res.data))
-      .catch(() => setRecords([]));
+    if (!user?.employee_id) {
+      console.log('No employee_id found for user:', user);
+      return;
+    }
+    console.log('Fetching attendance for employee_id:', user.employee_id);
+    axios.get(`${API_URL}/attendance/employee/${user.employee_id}`)
+      .then(res => {
+        console.log('Attendance data received:', res.data);
+        setRecords(res.data);
+      })
+      .catch(err => {
+        console.error('Fetch attendance error:', err);
+        setRecords([]);
+      });
   };
 
   useEffect(() => {
@@ -175,13 +185,13 @@ export default function AttendanceScreen({ user }) {
                     <View style={styles.timeItem}>
                       <MaterialIcons name="login" size={24} color="#43a047" />
                       <Text style={styles.timeLabel}>Giờ vào</Text>
-                      <Text style={styles.timeValue}>{formatDateTime(item.timestamp_in).split(' ')[1]}</Text>
+                      <Text style={styles.timeValue}>{item.start_time || formatDateTime(item.timestamp_in).split(' ')[1]}</Text>
                     </View>
                     <View style={styles.timeDivider} />
                     <View style={styles.timeItem}>
                       <MaterialIcons name="logout" size={24} color="#e53935" />
                       <Text style={styles.timeLabel}>Giờ ra</Text>
-                      <Text style={styles.timeValue}>{item.timestamp_out ? formatDateTime(item.timestamp_out).split(' ')[1] : "-"}</Text>
+                      <Text style={styles.timeValue}>{item.end_time || "-"}</Text>
                     </View>
                   </View>
                 </View>
@@ -223,15 +233,22 @@ export default function AttendanceScreen({ user }) {
                     <View style={styles.detailRow}>
                       <MaterialIcons name="login" size={24} color="#43a047" />
                       <View style={styles.detailText}>
-                        <Text style={styles.detailLabel}>Thời gian vào</Text>
-                        <Text style={styles.detailValue}>{formatDateTime(selectedRecord.timestamp_in)}</Text>
+                        <Text style={styles.detailLabel}>Giờ vào ca</Text>
+                        <Text style={styles.detailValue}>{selectedRecord.start_time || "-"}</Text>
                       </View>
                     </View>
                     <View style={styles.detailRow}>
                       <MaterialIcons name="logout" size={24} color="#e53935" />
                       <View style={styles.detailText}>
-                        <Text style={styles.detailLabel}>Thời gian ra</Text>
-                        <Text style={styles.detailValue}>{formatDateTime(selectedRecord.timestamp_out)}</Text>
+                        <Text style={styles.detailLabel}>Giờ ra ca</Text>
+                        <Text style={styles.detailValue}>{selectedRecord.end_time || "-"}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <MaterialIcons name="alarm" size={24} color="#43a047" />
+                      <View style={styles.detailText}>
+                        <Text style={styles.detailLabel}>Thời gian điểm danh</Text>
+                        <Text style={styles.detailValue}>{formatDateTime(selectedRecord.timestamp_in)}</Text>
                       </View>
                     </View>
                     <View style={styles.detailRow}>
