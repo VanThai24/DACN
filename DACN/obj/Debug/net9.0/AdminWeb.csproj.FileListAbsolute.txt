@@ -352,4 +352,3 @@ D:\DACN\DACN\obj\Debug\net9.0\refint\AdminWeb.dll
 D:\DACN\DACN\obj\Debug\net9.0\AdminWeb.pdb
 D:\DACN\DACN\obj\Debug\net9.0\AdminWeb.genruntimeconfig.cache
 D:\DACN\DACN\obj\Debug\net9.0\ref\AdminWeb.dll
-D:\DACN\DACN\bin\Debug\net9.0\AI\class_mapping.json
