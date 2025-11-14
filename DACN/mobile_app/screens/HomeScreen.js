@@ -1,11 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Dimensions, Image, ActivityIndicator, ScrollView, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, StyleSheet, Dimensions, Image, ActivityIndicator, ScrollView, TouchableOpacity, Alert, Animated } from "react-native";
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
-import { API_URL } from "../config";
+import { API_URL, SERVER_IP } from "../config";
+import { colors } from '../theme/colors';
+import { typography } from '../theme/typography';
+import { spacing } from '../theme/spacing';
 
 const { height, width } = Dimensions.get('window');
+
+// Đếm số ngày làm việc trong tháng
+function getWorkdaysInMonth() {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let workdays = 0;
+  
+  for (let i = 1; i <= daysInMonth; i++) {
+    const date = new Date(year, month, i);
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) workdays++;
+  }
+  
+  return workdays;
+}
 
 function getMonthStats(records) {
   const now = new Date();
@@ -34,11 +54,60 @@ function getCheckinStats(records) {
   return { ontime, late };
 }
 
+function getAbsentDays(records) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // Tạo Set các ngày đã điểm danh
+  const attendedDays = new Set();
+  records.forEach(r => {
+    const d = new Date(r.timestamp_in);
+    if (d.getMonth() === month && d.getFullYear() === year) {
+      attendedDays.add(d.getDate());
+    }
+  });
+  
+  // Đếm số ngày vắng (chỉ tính ngày đã qua)
+  let absentCount = 0;
+  for (let i = 1; i <= daysInMonth; i++) {
+    const date = new Date(year, month, i);
+    const dayOfWeek = date.getDay();
+    // Chỉ tính ngày làm việc (thứ 2-6) và đã qua
+    if (dayOfWeek >= 1 && dayOfWeek <= 5 && date < now) {
+      if (!attendedDays.has(i)) {
+        absentCount++;
+      }
+    }
+  }
+  
+  return absentCount;
+}
+
 export default function HomeScreen({ user, navigation }) {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
+
+  const fetchAttendance = () => {
     if (!user?.employee_id) {
       console.log('No employee_id in user:', user);
       return;
@@ -56,385 +125,313 @@ export default function HomeScreen({ user, navigation }) {
         setRecords([]);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchAttendance();
+    // Auto refresh mỗi 5 phút
+    const interval = setInterval(() => {
+      fetchAttendance();
+    }, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, [user]);
 
   const name = user?.full_name || user?.name || user?.username || "Nhân viên";
   const department = user?.department || user?.department_name || "Chưa cập nhật";
+  
+  // Xử lý avatar
   let avatar = user?.avatar;
   if (!avatar) {
-    avatar = user?.photo_path || user?.photoPath;
-    if (avatar && avatar.startsWith("/")) {
-      avatar = `http://${user?.server_ip || '192.168.110.45'}:8000${avatar}`;
+    const photoPath = user?.photo_path || user?.photoPath;
+    if (photoPath) {
+      if (photoPath.startsWith("http")) {
+        avatar = photoPath;
+      } else if (photoPath.startsWith("/")) {
+        avatar = `http://${SERVER_IP}:8000${photoPath}`;
+      } else {
+        avatar = `http://${SERVER_IP}:8000/photos/${photoPath}`;
+      }
     }
+  } else if (avatar.startsWith("/")) {
+    avatar = `http://${SERVER_IP}:8000${avatar}`;
   }
-  if (!avatar) avatar = "https://randomuser.me/api/portraits/men/32.jpg";
+  
+  // Fallback với avatar placeholder theo chữ cái đầu
+  if (!avatar) {
+    const initial = name.charAt(0).toUpperCase();
+    avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=200`;
+  }
+  
+  console.log('HomeScreen - Avatar:', { 
+    username: user?.username,
+    user_avatar: user?.avatar,
+    photo_path: user?.photo_path,
+    final_avatar: avatar 
+  });
 
   const monthDays = getMonthStats(records);
   const { ontime, late } = getCheckinStats(records);
+  const absentDays = getAbsentDays(records);
+  const totalWorkdays = getWorkdaysInMonth();
   const total = ontime + late;
   const ontimePercent = total > 0 ? Math.round((ontime / total) * 100) : 0;
 
-  const QuickActionButton = ({ icon, label, color, onPress }) => (
-    <TouchableOpacity style={[styles.quickAction, { borderColor: color }]} onPress={onPress}>
-      <LinearGradient
-        colors={[color + '15', color + '05']}
-        style={styles.quickActionGradient}
-      >
-        <Ionicons name={icon} size={28} color={color} />
-        <Text style={[styles.quickActionText, { color }]}>{label}</Text>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
+  // Removed QuickActionButton component - using inline TouchableOpacity instead
 
   return (
-    <LinearGradient colors={["#667eea", "#764ba2", "#f093fb"]} style={styles.gradient}>
+    <View style={styles.gradient}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
-          {/* Header Card with Wave Background */}
-          <View style={styles.headerCard}>
-            <LinearGradient colors={["#ffffff", "#f8f9fa"]} style={styles.headerGradient}>
-              <View style={styles.headerContent}>
-                <View style={styles.avatarContainer}>
-                  <Image source={{ uri: avatar }} style={styles.avatar} />
-                  <View style={styles.onlineBadge} />
-                </View>
-                <View style={styles.headerInfo}>
-                  <Text style={styles.greeting}>Xin chào 👋</Text>
-                  <Text style={styles.name}>{name}</Text>
-                  <View style={styles.departmentBadge}>
-                    <MaterialIcons name="business" size={14} color="#667eea" />
-                    <Text style={styles.department}>{department}</Text>
-                  </View>
-                </View>
-              </View>
-            </LinearGradient>
-          </View>
-
-          {/* Quick Actions */}
-          <View style={styles.quickActionsContainer}>
-            <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
-            <View style={styles.quickActionsGrid}>
-              <QuickActionButton 
-                icon="calendar-outline" 
-                label="Lịch sử" 
-                color="#f093fb" 
-                onPress={() => navigation.navigate('Attendance')} 
+        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={styles.avatarContainer}>
+              <Image 
+                source={{ uri: avatar }} 
+                style={styles.avatar}
+                onError={(e) => console.log('Avatar load error:', e.nativeEvent.error)}
+                onLoad={() => console.log('Avatar loaded successfully:', avatar)}
               />
-              <QuickActionButton 
-                icon="person-outline" 
-                label="Hồ sơ" 
-                color="#feca57" 
-                onPress={() => navigation.navigate('Profile')} 
-              />
-              <QuickActionButton 
-                icon="stats-chart" 
-                label="Thống kê" 
-                color="#00d4ff" 
-                onPress={() => Alert.alert('Thống kê', 'Xem thống kê chi tiết tại trang Điểm danh')} 
-              />
-              <QuickActionButton 
-                icon="information-circle" 
-                label="Hỗ trợ" 
-                color="#43a047" 
-                onPress={() => Alert.alert('Hỗ trợ', 'Liên hệ IT: 0123456789')} 
-              />
+            </View>
+            <Text style={styles.name}>{name}</Text>
+            <View style={styles.departmentBadge}>
+              <MaterialIcons name="business" size={14} color="#64748b" />
+              <Text style={styles.department}>{department}</Text>
             </View>
           </View>
 
-          {/* Stats Container with Modern Design */}
-          <View style={styles.statsContainer}>
-            <Text style={styles.sectionTitle}>📊 Thống kê tháng {new Date().getMonth() + 1}</Text>
+          {/* Quick Actions */}
+          <View style={styles.quickActionsGrid}>
+            <TouchableOpacity style={styles.quickAction} onPress={() => navigation.navigate('Attendance')}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#e0f2fe' }]}>
+                <Ionicons name="calendar" size={24} color="#3b82f6" />
+              </View>
+              <Text style={styles.quickActionText}>Lịch sử</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickAction} onPress={() => navigation.navigate('Profile')}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#f3e8ff' }]}>
+                <Ionicons name="person" size={24} color="#8b5cf6" />
+              </View>
+              <Text style={styles.quickActionText}>Hồ sơ</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickAction} onPress={() => Alert.alert('Thống kê', 'Xem thống kê chi tiết tại trang Điểm danh')}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#fce7f3' }]}>
+                <Ionicons name="stats-chart" size={24} color="#ec4899" />
+              </View>
+              <Text style={styles.quickActionText}>Thống kê</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickAction} onPress={() => Alert.alert('Hỗ trợ', 'Liên hệ IT: 0123456789')}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#d1fae5' }]}>
+                <Ionicons name="help-circle" size={24} color="#10b981" />
+              </View>
+              <Text style={styles.quickActionText}>Hỗ trợ</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Stats Section */}
+          <View style={styles.statsSection}>
+            <Text style={styles.sectionTitle}>Thống kê tháng {new Date().getMonth() + 1}</Text>
             {loading ? (
-              <ActivityIndicator size="large" color="#667eea" style={{ marginTop: 30 }} />
+              <ActivityIndicator size="large" color="#3b82f6" style={{ marginTop: 30 }} />
             ) : (
               <>
-                {/* Main Stats Card */}
-                <View style={styles.mainStatsCard}>
-                  <LinearGradient colors={["#667eea", "#764ba2"]} style={styles.mainStatsGradient}>
-                    <View style={styles.mainStatItem}>
-                      <Text style={styles.mainStatNumber}>{monthDays}</Text>
-                      <Text style={styles.mainStatLabel}>Ngày làm việc</Text>
-                    </View>
-                    <View style={styles.mainStatDivider} />
-                    <View style={styles.mainStatItem}>
-                      <Text style={styles.mainStatNumber}>{ontimePercent}%</Text>
-                      <Text style={styles.mainStatLabel}>Đúng giờ</Text>
-                    </View>
-                  </LinearGradient>
-                </View>
-
-                {/* Detail Stats Grid */}
-                <View style={styles.statsGrid}>
-                  <View style={[styles.statCard, { borderLeftColor: "#43a047" }]}>
-                    <View style={[styles.statIconCircle, { backgroundColor: "#43a04715" }]}>
-                      <MaterialIcons name="check-circle" size={32} color="#43a047" />
-                    </View>
-                    <Text style={styles.statNumber}>{ontime}</Text>
-                    <Text style={styles.statLabel}>Đúng giờ</Text>
+                {/* Main Stats */}
+                <View style={styles.mainStatsRow}>
+                  <View style={styles.mainStatCard}>
+                    <Text style={styles.mainStatNumber}>{monthDays}</Text>
+                    <Text style={styles.mainStatLabel}>Ngày làm việc</Text>
                   </View>
-
-                  <View style={[styles.statCard, { borderLeftColor: "#e53935" }]}>
-                    <View style={[styles.statIconCircle, { backgroundColor: "#e5393515" }]}>
-                      <MaterialIcons name="access-time" size={32} color="#e53935" />
-                    </View>
-                    <Text style={styles.statNumber}>{late}</Text>
-                    <Text style={styles.statLabel}>Đi trễ</Text>
+                  <View style={styles.mainStatCard}>
+                    <Text style={styles.mainStatNumber}>{ontimePercent}%</Text>
+                    <Text style={styles.mainStatLabel}>Đúng giờ</Text>
                   </View>
                 </View>
 
-                <View style={styles.statsGrid}>
-                  <View style={[styles.statCard, { borderLeftColor: "#2979ff" }]}>
-                    <View style={[styles.statIconCircle, { backgroundColor: "#2979ff15" }]}>
-                      <MaterialIcons name="schedule" size={32} color="#2979ff" />
-                    </View>
-                    <Text style={styles.statNumber}>{total}</Text>
-                    <Text style={styles.statLabel}>Tổng lần</Text>
+                {/* Detail Stats */}
+                <View style={styles.detailStatsGrid}>
+                  <View style={styles.detailStatCard}>
+                    <MaterialIcons name="check-circle" size={20} color="#10b981" />
+                    <Text style={styles.detailStatNumber}>{ontime}</Text>
+                    <Text style={styles.detailStatLabel}>Đúng giờ</Text>
                   </View>
-
-                  <View style={[styles.statCard, { borderLeftColor: "#ffa726" }]}>
-                    <View style={[styles.statIconCircle, { backgroundColor: "#ffa72615" }]}>
-                      <MaterialIcons name="trending-up" size={32} color="#ffa726" />
-                    </View>
-                    <Text style={styles.statNumber}>{monthDays * 8}h</Text>
-                    <Text style={styles.statLabel}>Thời gian</Text>
+                  <View style={styles.detailStatCard}>
+                    <MaterialIcons name="access-time" size={20} color="#ef4444" />
+                    <Text style={styles.detailStatNumber}>{late}</Text>
+                    <Text style={styles.detailStatLabel}>Đi trễ</Text>
+                  </View>
+                  <View style={styles.detailStatCard}>
+                    <MaterialIcons name="event-busy" size={20} color="#f59e0b" />
+                    <Text style={styles.detailStatNumber}>{absentDays}</Text>
+                    <Text style={styles.detailStatLabel}>Vắng</Text>
+                  </View>
+                  <View style={styles.detailStatCard}>
+                    <MaterialIcons name="schedule" size={20} color="#64748b" />
+                    <Text style={styles.detailStatNumber}>{monthDays * 8}h</Text>
+                    <Text style={styles.detailStatLabel}>Tổng giờ</Text>
                   </View>
                 </View>
               </>
             )}
           </View>
 
-          {/* Info Banner */}
-          <View style={styles.infoBanner}>
-            <LinearGradient colors={["#667eea20", "#764ba220"]} style={styles.infoBannerGradient}>
-              <Ionicons name="shield-checkmark" size={28} color="#667eea" />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.infoTitle}>Hệ thống FaceID</Text>
-                <Text style={styles.infoSubtitle}>Điểm danh tự động và bảo mật</Text>
-              </View>
-            </LinearGradient>
-          </View>
-
-          <View style={{ height: 30 }} />
-        </View>
+          <View style={{ height: 20 }} />
+        </Animated.View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: { flex: 1 },
+  gradient: { 
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
   scrollView: { flex: 1 },
   container: {
     flex: 1,
-    padding: 16,
-  },
-  headerCard: {
-    marginTop: 10,
-    marginBottom: 20,
-    borderRadius: 24,
-    overflow: 'hidden',
-    elevation: 8,
-    shadowColor: '#667eea',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-  },
-  headerGradient: {
     padding: 20,
   },
-  headerContent: {
-    flexDirection: 'row',
+  header: {
+    marginBottom: 24,
     alignItems: 'center',
   },
   avatarContainer: {
-    position: 'relative',
-    marginRight: 16,
+    marginBottom: 12,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    borderWidth: 4,
-    borderColor: '#fff',
-  },
-  onlineBadge: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#43a047',
     borderWidth: 3,
     borderColor: '#fff',
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  greeting: {
-    fontSize: 15,
-    color: '#666',
-    marginBottom: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   name: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0f172a',
     marginBottom: 8,
+    textAlign: 'center',
   },
   departmentBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#667eea15',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   department: {
     fontSize: 13,
-    color: '#667eea',
-    fontWeight: '600',
+    color: '#64748b',
+    fontWeight: '500',
     marginLeft: 6,
   },
 
-  // Quick Actions
-  quickActionsContainer: {
+  quickActionsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  quickAction: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 16,
+    marginHorizontal: 4,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quickActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
+
+  // Stats Section
+  statsSection: {
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 12,
-    paddingLeft: 4,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  quickAction: {
-    width: (width - 48) / 4,
-    marginBottom: 12,
-    borderRadius: 16,
-    borderWidth: 2,
-    overflow: 'hidden',
-  },
-  quickActionGradient: {
-    padding: 12,
-    alignItems: 'center',
-  },
-  quickActionText: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 6,
-    textAlign: 'center',
-  },
-
-  // Stats Container
-  statsContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    padding: 20,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0f172a',
     marginBottom: 16,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
   },
-  mainStatsCard: {
-    marginTop: 16,
-    marginBottom: 20,
-    borderRadius: 20,
-    overflow: 'hidden',
-    elevation: 4,
-  },
-  mainStatsGradient: {
+  mainStatsRow: {
     flexDirection: 'row',
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    marginBottom: 16,
   },
-  mainStatItem: {
+  mainStatCard: {
     flex: 1,
+    backgroundColor: '#fff',
+    padding: 20,
+    marginHorizontal: 4,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   mainStatNumber: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: 36,
+    fontWeight: '700',
+    color: '#0f172a',
     marginBottom: 4,
   },
   mainStatLabel: {
     fontSize: 14,
-    color: '#fff',
-    opacity: 0.9,
-  },
-  mainStatDivider: {
-    width: 1,
-    backgroundColor: '#ffffff40',
-    marginHorizontal: 12,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 4,
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    elevation: 2,
-  },
-  statIconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statNumber: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginVertical: 4,
-  },
-  statLabel: {
-    fontSize: 13,
-    color: '#666',
-    textAlign: 'center',
+    color: '#64748b',
     fontWeight: '500',
   },
-
-  // Info Banner
-  infoBanner: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    elevation: 4,
-  },
-  infoBannerGradient: {
+  detailStatsGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
   },
-  infoTextContainer: {
+  detailStatCard: {
     flex: 1,
-    marginLeft: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+    marginHorizontal: 4,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#667eea',
+  detailStatNumber: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0f172a',
     marginBottom: 4,
   },
-  infoSubtitle: {
-    fontSize: 13,
-    color: '#764ba2',
+  detailStatLabel: {
+    fontSize: 11,
+    color: '#64748b',
+    textAlign: 'center',
   },
 });

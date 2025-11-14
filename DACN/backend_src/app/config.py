@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     
     # File Upload
     max_upload_size: int = 10485760  # 10MB
-    upload_folder: str = "../wwwroot/photos"
+    upload_folder: str = "wwwroot/photos"  # Relative to project root where backend runs
     allowed_extensions: str = "jpg,jpeg,png"  # Will be converted to list by validator
     
     # Email

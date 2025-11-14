@@ -19,11 +19,13 @@ namespace Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<EmployeesController> _logger;
+        private readonly IConfiguration _configuration;
         
-        public EmployeesController(AppDbContext context, ILogger<EmployeesController> logger)
+        public EmployeesController(AppDbContext context, ILogger<EmployeesController> logger, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -205,26 +207,122 @@ namespace Controllers
         {
             try
             {
-                var fromAddress = new System.Net.Mail.MailAddress("your_email@gmail.com", "Admin");
+                // Đọc cấu hình SMTP từ appsettings.json
+                var config = _configuration.GetSection("EmailSettings");
+                var smtpHost = config["SmtpHost"];
+                var smtpPort = int.Parse(config["SmtpPort"] ?? "587");
+                var enableSsl = bool.Parse(config["EnableSsl"] ?? "true");
+                var fromEmail = config["FromEmail"] ?? "your_email@gmail.com";
+                var fromName = config["FromName"] ?? "Admin";
+                var username = config["Username"] ?? fromEmail;
+                var password = config["Password"] ?? "";
+
+                // Kiểm tra xem email có được cấu hình chưa
+                if (string.IsNullOrEmpty(smtpHost) || string.IsNullOrEmpty(password) || password == "your_app_password_here")
+                {
+                    _logger.LogWarning("Email chưa được cấu hình. Vui lòng cập nhật EmailSettings trong appsettings.json");
+                    return;
+                }
+
+                var fromAddress = new System.Net.Mail.MailAddress(fromEmail, fromName);
                 var toAddress = new System.Net.Mail.MailAddress(toEmail, empName);
-                // CHÚ Ý: Thay bằng mật khẩu thật hoặc dùng App Password của Gmail nếu dùng Gmail
-                const string fromPassword = "your_email_password"; 
-                string subject = "Thông báo thêm nhân viên";
-                string body = $"Chào {empName}, bạn đã được thêm vào hệ thống. Tài khoản đăng nhập: {phone}, mật khẩu mặc định: 123456. Vui lòng đăng nhập và đổi mật khẩu.";
+                string subject = "🎉 Chào mừng bạn đến với Hệ Thống Chấm Công DACN";
+                
+                // Email body với HTML format chuyên nghiệp
+                string body = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>
+        body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa; }}
+        .card {{ background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+        .header {{ text-align: center; margin-bottom: 30px; }}
+        .logo {{ width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                 border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; }}
+        .logo-text {{ color: white; font-size: 36px; font-weight: bold; }}
+        h1 {{ color: #2c3e50; margin: 0; font-size: 24px; }}
+        .welcome {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }}
+        .info-box {{ background: #f1f3f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }}
+        .credential {{ display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e9ecef; }}
+        .credential:last-child {{ border-bottom: none; }}
+        .label {{ font-weight: 600; color: #495057; }}
+        .value {{ color: #6c757d; font-family: 'Courier New', monospace; background: #fff; padding: 4px 12px; border-radius: 4px; }}
+        .warning {{ background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin: 20px 0; }}
+        .footer {{ text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 14px; }}
+        .btn {{ display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                color: white; text-decoration: none; border-radius: 25px; margin: 20px 0; font-weight: 600; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='card'>
+            <div class='header'>
+                <div class='logo'>
+                    <span class='logo-text'>👤</span>
+                </div>
+                <h1>Hệ thống Chấm công DACN</h1>
+            </div>
+            
+            <div class='welcome'>
+                <h2 style='margin: 0; font-size: 20px;'>🎉 Chào mừng {empName}!</h2>
+                <p style='margin: 10px 0 0 0;'>Bạn đã được thêm vào hệ thống chấm công</p>
+            </div>
+            
+            <p>Xin chào <strong>{empName}</strong>,</p>
+            <p>Chúc mừng bạn! Tài khoản của bạn đã được tạo thành công trong <strong>Hệ thống Chấm công DACN</strong>.</p>
+            
+            <div class='info-box'>
+                <h3 style='margin-top: 0; color: #495057;'>📋 Thông tin đăng nhập</h3>
+                <div class='credential'>
+                    <span class='label'>Tài khoản:</span>
+                    <span class='value'>{phone}</span>
+                </div>
+                <div class='credential'>
+                    <span class='label'>Mật khẩu:</span>
+                    <span class='value'>123456</span>
+                </div>
+            </div>
+            
+            <div class='warning'>
+                <strong>⚠️ Lưu ý quan trọng:</strong>
+                <ul style='margin: 10px 0 0 0; padding-left: 20px;'>
+                    <li>Đây là mật khẩu tạm thời</li>
+                    <li>Vui lòng <strong>đổi mật khẩu</strong> ngay sau lần đăng nhập đầu tiên</li>
+                    <li>Không chia sẻ thông tin đăng nhập với người khác</li>
+                </ul>
+            </div>
+            
+            <p style='text-align: center;'>
+                <a href='http://localhost:5280' class='btn'>🚀 Đăng nhập ngay</a>
+            </p>
+            
+            <div class='footer'>
+                <p><strong>Hệ thống Chấm công DACN</strong></p>
+                <p>Email: {fromEmail} | Hỗ trợ: 24/7</p>
+                <p style='font-size: 12px; color: #adb5bd;'>© 2025 DACN System. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>";
 
                 var smtp = new System.Net.Mail.SmtpClient
                 {
-                    Host = "smtp.gmail.com",
-                    Port = 587,
-                    EnableSsl = true,
+                    Host = smtpHost,
+                    Port = smtpPort,
+                    EnableSsl = enableSsl,
                     DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false,
-                    Credentials = new System.Net.NetworkCredential(fromAddress.Address, fromPassword)
+                    Credentials = new System.Net.NetworkCredential(username, password)
                 };
                 using (var message = new System.Net.Mail.MailMessage(fromAddress, toAddress)
                 {
                     Subject = subject,
-                    Body = body
+                    Body = body,
+                    IsBodyHtml = true  // Quan trọng: Enable HTML
                 })
                 {
                     smtp.Send(message);

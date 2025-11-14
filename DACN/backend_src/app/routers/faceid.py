@@ -14,7 +14,9 @@ import numpy as np
 import cv2
 import base64
 import os
-from tensorflow import keras
+import face_recognition
+from PIL import Image
+import io
 
 router = APIRouter(tags=["faceid"])
 security = HTTPBearer()
@@ -22,21 +24,28 @@ limiter = Limiter(key_func=get_remote_address)
 SECRET_KEY = settings.jwt_secret_key
 ALGORITHM = settings.jwt_algorithm
 
-# Load model AI để trích xuất embedding
-MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "AI", "faceid_model_tf.h5")
-face_model = None
-
-def load_face_model():
-    global face_model
-    if face_model is None:
-        if os.path.exists(MODEL_PATH):
-            face_model = keras.models.load_model(MODEL_PATH)
-            # Build model bằng cách predict dummy data
-            _ = face_model.predict(np.zeros((1, 128, 128, 3)), verbose=0)
-            print(f"[INFO] Đã tải và build mô hình AI từ: {MODEL_PATH}")
-        else:
-            print(f"[WARNING] Không tìm thấy mô hình AI tại: {MODEL_PATH}")
-    return face_model
+def extract_face_embedding(image_bytes):
+    """
+    Extract face embedding using face_recognition (dlib)
+    Returns 128-dimensional face encoding
+    """
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        img_array = np.array(img)
+        
+        # Extract face encodings using face_recognition
+        face_encodings = face_recognition.face_encodings(img_array, model='large')
+        
+        if len(face_encodings) == 0:
+            return None, "No face detected in image"
+        
+        if len(face_encodings) > 1:
+            logger.warning(f"Multiple faces detected ({len(face_encodings)}), using first one")
+        
+        return face_encodings[0], None
+    except Exception as e:
+        logger.error(f"Error extracting face embedding: {e}")
+        return None, str(e)
 
 def verify_jwt(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
@@ -84,54 +93,28 @@ async def add_face(
     try:
         # Đọc file ảnh
         contents = await image.read()
-        nparr = np.frombuffer(contents, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         
-        if img is None:
-            logger.error("Failed to decode image")
+        # Extract face embedding using face_recognition
+        embedding, error_msg = extract_face_embedding(contents)
+        
+        if embedding is None:
+            logger.warning(f"Failed to extract embedding for {name}: {error_msg}")
             return FaceAddResponse(
                 success=False,
-                message="Cannot decode image file"
+                message=error_msg or "Cannot detect face in image"
             )
-        
-        # Load mô hình AI
-        model = load_face_model()
-        if model is None:
-            logger.error("AI model not available")
-            return FaceAddResponse(
-                success=False,
-                message="AI model not ready"
-            )
-        
-        # Tiền xử lý ảnh: resize về 160x160 (kích thước mô hình được huấn luyện) và chuẩn hóa
-        img_resized = cv2.resize(img, (160, 160))
-        img_normalized = img_resized.astype('float32') / 255.0
-        img_batch = np.expand_dims(img_normalized, axis=0)
-        
-        # Lấy embedding từ layer Dense thứ 2 (128 chiều) thay vì softmax (6 chiều)
-        # Predict model đầy đủ trước
-        _ = model.predict(img_batch, verbose=0)
-        
-        # Tạo partial model bằng cách slice layers (không dùng model.input)
-        from tensorflow.keras.models import Sequential
-        embedding_layers = model.layers[:-1]  # Bỏ layer cuối (classification)
-        partial_model = Sequential(embedding_layers)
-        
-        # Predict với partial model
-        embedding = partial_model.predict(img_batch, verbose=0)
-        embedding_flat = embedding.flatten()
         
         # Chuyển embedding thành base64 để trả về
-        embedding_bytes = embedding_flat.astype('float32').tobytes()
+        embedding_bytes = embedding.astype('float32').tobytes()
         embedding_b64 = base64.b64encode(embedding_bytes).decode('utf-8')
         
-        print(f"[INFO] Đã tạo embedding cho {name}, kích thước: {embedding_flat.shape}")
+        logger.info(f"Successfully created embedding for {name}, size: {len(embedding)}")
         
         return JSONResponse({
             "success": True,
             "embedding_b64": embedding_b64,
             "name": name,
-            "embedding_size": len(embedding_flat)
+            "embedding_size": len(embedding)
         })
         
     except Exception as e:

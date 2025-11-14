@@ -1,9 +1,78 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Modal, ScrollView } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Modal, ScrollView, Animated } from "react-native";
 import axios from "axios";
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from "expo-linear-gradient";
 import { API_URL } from "../config";
+import { colors } from '../theme/colors';
+import { typography } from '../theme/typography';
+import { spacing } from '../theme/spacing';
+
+// Tạo danh sách tất cả ngày làm việc trong tháng
+function getAllWorkdaysInMonth() {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const workdays = [];
+  
+  for (let i = 1; i <= daysInMonth; i++) {
+    const date = new Date(year, month, i);
+    const dayOfWeek = date.getDay();
+    // Thứ 2-6 (1-5) là ngày làm việc
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      workdays.push(date);
+    }
+  }
+  
+  return workdays;
+}
+
+// Merge dữ liệu thực tế với tất cả ngày làm việc
+function mergeAttendanceWithWorkdays(records) {
+  const workdays = getAllWorkdaysInMonth();
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Reset time để so sánh ngày
+  
+  // Tạo map từ records hiện có
+  const recordMap = new Map();
+  records.forEach(r => {
+    if (r.timestamp_in) {
+      const d = new Date(r.timestamp_in);
+      const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      recordMap.set(dateKey, r);
+    }
+  });
+  
+  // Tạo danh sách đầy đủ
+  const fullList = workdays.map(workday => {
+    const dateKey = `${workday.getFullYear()}-${workday.getMonth()}-${workday.getDate()}`;
+    const existingRecord = recordMap.get(dateKey);
+    
+    if (existingRecord) {
+      return existingRecord;
+    } else if (workday < now) {
+      // Ngày đã qua mà không có dữ liệu = VẮNG
+      return {
+        id: `absent-${dateKey}`,
+        timestamp_in: workday.toISOString(),
+        status: 'absent',
+        isAbsent: true
+      };
+    } else {
+      // Ngày chưa đến
+      return {
+        id: `future-${dateKey}`,
+        timestamp_in: workday.toISOString(),
+        status: 'future',
+        isFuture: true
+      };
+    }
+  });
+  
+  // Sắp xếp mới nhất trước
+  return fullList.reverse();
+}
 
 function getMonthStats(records) {
   const now = new Date();
@@ -11,6 +80,7 @@ function getMonthStats(records) {
   const year = now.getFullYear();
   const days = new Set();
   records.forEach(r => {
+    if (r.isAbsent || r.isFuture) return; // Bỏ qua ngày vắng và ngày tương lai
     const d = new Date(r.timestamp_in);
     if (d.getMonth() + 1 === month && d.getFullYear() === year) {
       days.add(d.toDateString());
@@ -26,6 +96,7 @@ function getQuarterStats(records) {
   const quarter = Math.floor((month - 1) / 3) + 1;
   const days = new Set();
   records.forEach(r => {
+    if (r.isAbsent || r.isFuture) return;
     const d = new Date(r.timestamp_in);
     const m = d.getMonth() + 1;
     const q = Math.floor((m - 1) / 3) + 1;
@@ -40,7 +111,7 @@ function getCheckinStats(records) {
   let ontime = 0, late = 0;
   const checkedDays = new Set();
   records.forEach(r => {
-    if (!r.timestamp_in) return;
+    if (r.isAbsent || r.isFuture || !r.timestamp_in) return;
     const d = new Date(r.timestamp_in);
     const hour = d.getHours();
     const minute = d.getMinutes();
@@ -53,19 +124,7 @@ function getCheckinStats(records) {
 }
 
 function getAbsentStats(records) {
-  // Giả sử tháng hiện tại có 22 ngày làm việc
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-  const daysInMonth = new Date(year, month, 0).getDate();
-  let workdays = 0;
-  for (let i = 1; i <= daysInMonth; i++) {
-    const d = new Date(year, month - 1, i);
-    // Chỉ tính thứ 2-6
-    if (d.getDay() >= 1 && d.getDay() <= 5) workdays++;
-  }
-  const { checkedDays } = getCheckinStats(records);
-  return workdays - checkedDays.size;
+  return records.filter(r => r.isAbsent).length;
 }
 
 
@@ -82,9 +141,27 @@ function formatDateTime(timestamp) {
 
 export default function AttendanceScreen({ user }) {
   const [records, setRecords] = useState([]);
+  const [fullRecords, setFullRecords] = useState([]); // Bao gồm cả ngày vắng
   const [refreshing, setRefreshing] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
 
   const fetchRecords = () => {
     if (!user?.employee_id) {
@@ -96,15 +173,27 @@ export default function AttendanceScreen({ user }) {
       .then(res => {
         console.log('Attendance data received:', res.data);
         setRecords(res.data);
+        // Merge với tất cả ngày làm việc
+        const merged = mergeAttendanceWithWorkdays(res.data);
+        setFullRecords(merged);
       })
       .catch(err => {
         console.error('Fetch attendance error:', err);
         setRecords([]);
+        // Vẫn hiển thị ngày vắng nếu API fail
+        const merged = mergeAttendanceWithWorkdays([]);
+        setFullRecords(merged);
       });
   };
 
   useEffect(() => {
     fetchRecords();
+    // Auto refresh mỗi 5 phút để cập nhật real-time
+    const interval = setInterval(() => {
+      fetchRecords();
+    }, 5 * 60 * 1000); // 5 minutes
+    
+    return () => clearInterval(interval);
   }, [user]);
 
   const onRefresh = () => {
@@ -119,35 +208,43 @@ export default function AttendanceScreen({ user }) {
   const absent = getAbsentStats(records);
 
   return (
-    <LinearGradient colors={["#667eea", "#764ba2"]} style={styles.gradient}>
-      <View style={styles.container}>
+    <View style={styles.gradient}>
+      <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <View style={styles.header}>
-          <Text style={styles.title}>📅 Lịch sử điểm danh</Text>
+          <Text style={styles.title}>Lịch sử điểm danh</Text>
           <Text style={styles.subtitle}>Tháng {new Date().getMonth() + 1}/{new Date().getFullYear()}</Text>
         </View>
 
         {/* Stats Cards Grid */}
         <View style={styles.statsContainer}>
           <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: '#43a047' }]}>
-              <MaterialIcons name="event-available" size={32} color="#fff" />
+            <View style={styles.statCard}>
+              <View style={[styles.statIconCircle, { backgroundColor: '#dbeafe' }]}>
+                <MaterialIcons name="event-available" size={24} color="#3b82f6" />
+              </View>
               <Text style={styles.statNumber}>{monthDays}</Text>
               <Text style={styles.statLabel}>Tháng này</Text>
             </View>
-            <View style={[styles.statCard, { backgroundColor: '#2979ff' }]}>
-              <MaterialIcons name="check-circle" size={32} color="#fff" />
+            <View style={styles.statCard}>
+              <View style={[styles.statIconCircle, { backgroundColor: '#d1fae5' }]}>
+                <MaterialIcons name="check-circle" size={24} color="#10b981" />
+              </View>
               <Text style={styles.statNumber}>{ontime}</Text>
               <Text style={styles.statLabel}>Đúng giờ</Text>
             </View>
           </View>
           <View style={styles.statsRow}>
-            <View style={[styles.statCard, { backgroundColor: '#e53935' }]}>
-              <MaterialIcons name="access-time" size={32} color="#fff" />
+            <View style={styles.statCard}>
+              <View style={[styles.statIconCircle, { backgroundColor: '#fee2e2' }]}>
+                <MaterialIcons name="access-time" size={24} color="#ef4444" />
+              </View>
               <Text style={styles.statNumber}>{late}</Text>
               <Text style={styles.statLabel}>Trễ giờ</Text>
             </View>
-            <View style={[styles.statCard, { backgroundColor: '#ffa726' }]}>
-              <MaterialIcons name="event" size={32} color="#fff" />
+            <View style={styles.statCard}>
+              <View style={[styles.statIconCircle, { backgroundColor: '#fef3c7' }]}>
+                <MaterialIcons name="event" size={24} color="#f59e0b" />
+              </View>
               <Text style={styles.statNumber}>{quarterDays}</Text>
               <Text style={styles.statLabel}>Quý này</Text>
             </View>
@@ -156,47 +253,86 @@ export default function AttendanceScreen({ user }) {
 
         {/* Records List */}
         <View style={styles.listContainer}>
-          <Text style={styles.listTitle}>Chi tiết điểm danh</Text>
+          <Text style={styles.listTitle}>Chi tiết điểm danh ({fullRecords.length} ngày)</Text>
           <FlatList
-            data={records}
+            data={fullRecords}
             keyExtractor={item => item.id.toString()}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#667eea"]} />
             }
-            renderItem={({ item }) => (
-              <TouchableOpacity 
-                style={styles.card}
-                onPress={() => {
-                  setSelectedRecord(item);
-                  setModalVisible(true);
-                }}
-              >
-                <View style={styles.cardHeader}>
-                  <View style={styles.cardDateBadge}>
-                    <MaterialIcons name="calendar-today" size={18} color="#667eea" />
-                    <Text style={styles.cardDate}>{formatDateTime(item.timestamp_in).split(' ')[0]}</Text>
-                  </View>
-                  <View style={[styles.statusBadge, item.status === "present" ? styles.presentBadge : styles.lateBadge]}>
-                    <Text style={styles.statusText}>{item.status === "present" ? "✓ Có mặt" : "⚠ Trễ"}</Text>
-                  </View>
-                </View>
-                <View style={styles.cardBody}>
-                  <View style={styles.timeRow}>
-                    <View style={styles.timeItem}>
-                      <MaterialIcons name="login" size={24} color="#43a047" />
-                      <Text style={styles.timeLabel}>Giờ vào</Text>
-                      <Text style={styles.timeValue}>{item.start_time || formatDateTime(item.timestamp_in).split(' ')[1]}</Text>
+            renderItem={({ item }) => {
+              // Xử lý hiển thị cho các trạng thái khác nhau
+              let statusBadgeStyle, statusText, statusIcon;
+              
+              if (item.isAbsent) {
+                statusBadgeStyle = styles.absentBadge;
+                statusText = "✗ Vắng";
+                statusIcon = "event-busy";
+              } else if (item.isFuture) {
+                statusBadgeStyle = styles.futureBadge;
+                statusText = "○ Chưa đến";
+                statusIcon = "schedule";
+              } else if (item.status === "present") {
+                statusBadgeStyle = styles.presentBadge;
+                statusText = "✓ Có mặt";
+                statusIcon = "check-circle";
+              } else {
+                statusBadgeStyle = styles.lateBadge;
+                statusText = "⚠ Trễ";
+                statusIcon = "warning";
+              }
+              
+              return (
+                <TouchableOpacity 
+                  style={[styles.card, item.isAbsent && styles.absentCard, item.isFuture && styles.futureCard]}
+                  onPress={() => {
+                    if (!item.isFuture) {
+                      setSelectedRecord(item);
+                      setModalVisible(true);
+                    }
+                  }}
+                  disabled={item.isFuture}
+                >
+                  <View style={styles.cardHeader}>
+                    <View style={styles.cardDateBadge}>
+                      <MaterialIcons name={item.isFuture ? "schedule" : "calendar-today"} size={18} color={item.isFuture ? "#999" : "#667eea"} />
+                      <Text style={[styles.cardDate, item.isFuture && styles.futureText]}>{formatDateTime(item.timestamp_in).split(' ')[0]}</Text>
                     </View>
-                    <View style={styles.timeDivider} />
-                    <View style={styles.timeItem}>
-                      <MaterialIcons name="logout" size={24} color="#e53935" />
-                      <Text style={styles.timeLabel}>Giờ ra</Text>
-                      <Text style={styles.timeValue}>{item.end_time || "-"}</Text>
+                    <View style={[styles.statusBadge, statusBadgeStyle]}>
+                      <MaterialIcons name={statusIcon} size={16} color="#fff" style={{marginRight: 4}} />
+                      <Text style={styles.statusText}>{statusText}</Text>
                     </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            )}
+                  <View style={styles.cardBody}>
+                    {item.isAbsent ? (
+                      <View style={styles.absentInfo}>
+                        <MaterialIcons name="cancel" size={40} color="#e53935" />
+                        <Text style={styles.absentText}>Không có dữ liệu điểm danh</Text>
+                      </View>
+                    ) : item.isFuture ? (
+                      <View style={styles.futureInfo}>
+                        <MaterialIcons name="schedule" size={40} color="#999" />
+                        <Text style={styles.futureInfoText}>Ngày chưa đến</Text>
+                      </View>
+                    ) : (
+                      <View style={styles.timeRow}>
+                        <View style={styles.timeItem}>
+                          <MaterialIcons name="login" size={24} color="#43a047" />
+                          <Text style={styles.timeLabel}>Giờ vào</Text>
+                          <Text style={styles.timeValue}>{item.start_time || formatDateTime(item.timestamp_in).split(' ')[1]}</Text>
+                        </View>
+                        <View style={styles.timeDivider} />
+                        <View style={styles.timeItem}>
+                          <MaterialIcons name="logout" size={24} color="#e53935" />
+                          <Text style={styles.timeLabel}>Giờ ra</Text>
+                          <Text style={styles.timeValue}>{item.end_time || "-"}</Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <MaterialIcons name="event-busy" size={80} color="#cccccc" />
@@ -273,136 +409,199 @@ export default function AttendanceScreen({ user }) {
             </View>
           </View>
         </Modal>
-      </View>
-    </LinearGradient>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: { flex: 1 },
-  container: { flex: 1, padding: 16 },
+  gradient: { 
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  container: { 
+    flex: 1, 
+    padding: 16,
+  },
   header: {
     marginBottom: 20,
-    marginTop: 10,
+    marginTop: 8,
   },
   title: { 
-    fontSize: 28, 
-    fontWeight: "bold", 
-    color: "#fff", 
+    fontSize: 24, 
+    fontWeight: '700', 
+    color: '#0f172a', 
     textAlign: "center",
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#ffffff90",
+    fontSize: 14,
+    color: '#64748b',
     textAlign: "center",
+    fontWeight: typography.weights.medium,
   },
   
   // Stats Container
   statsContainer: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   statsRow: { 
     flexDirection: 'row', 
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: spacing.sm,
   },
   statCard: {
     flex: 1,
-    borderRadius: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
     padding: 16,
     marginHorizontal: 4,
     alignItems: 'center',
-    elevation: 4,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
   },
   statNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginVertical: 8,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginVertical: 4,
   },
   statLabel: {
-    fontSize: 13,
-    color: '#fff',
-    opacity: 0.9,
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '500',
   },
 
   // List Container
   listContainer: {
     flex: 1,
     backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderRadius: 16,
     padding: 16,
-    elevation: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
   },
   listTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f172a',
     marginBottom: 16,
   },
 
   // Card Styles
   card: { 
-    backgroundColor: "#fff", 
-    borderRadius: 16, 
+    backgroundColor: '#fff', 
+    borderRadius: 12, 
     padding: 16, 
     marginBottom: 12, 
-    borderWidth: 2, 
-    borderColor: "#f0f0f0", 
+    borderLeftWidth: 3, 
+    borderLeftColor: '#3b82f6', 
+    borderColor: '#e2e8f0', 
     elevation: 2, 
-    shadowColor: '#667eea', 
-    shadowOpacity: 0.1, 
-    shadowRadius: 8,
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08, 
+    shadowRadius: 3,
+  },
+  statIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
+    marginBottom: 8,
+    paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#f1f5f9',
   },
   cardDateBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#667eea15',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: '#e0f2fe',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   cardDate: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#667eea',
-    marginLeft: 6,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#3b82f6',
+    marginLeft: 4,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   presentBadge: {
-    backgroundColor: '#43a04715',
+    backgroundColor: '#10b981',
   },
   lateBadge: {
-    backgroundColor: '#e5393515',
+    backgroundColor: '#f59e0b',
+  },
+  absentBadge: {
+    backgroundColor: '#ef4444',
+  },
+  futureBadge: {
+    backgroundColor: '#94a3b8',
   },
   statusText: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#43a047',
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  
+  // Absent & Future Card Styles
+  absentCard: {
+    borderLeftColor: '#ef4444',
+    backgroundColor: '#fef2f2',
+  },
+  futureCard: {
+    borderLeftColor: '#cbd5e1',
+    backgroundColor: '#f8fafc',
+    opacity: 0.75,
+  },
+  absentInfo: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  absentText: {
+    fontSize: typography.sizes.sm,
+    color: colors.error.main,
+    fontWeight: typography.weights.bold,
+    marginTop: spacing.sm,
+  },
+  futureInfo: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  futureInfoText: {
+    fontSize: typography.sizes.sm,
+    color: colors.text.secondary,
+    marginTop: spacing.sm,
+    fontWeight: typography.weights.medium,
+  },
+  futureText: {
+    color: colors.text.secondary,
   },
 
   // Card Body
   cardBody: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   timeRow: {
     flexDirection: 'row',
@@ -411,85 +610,101 @@ const styles = StyleSheet.create({
   timeItem: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: spacing.xs,
   },
   timeLabel: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 8,
+    fontSize: typography.sizes.xs,
+    color: colors.text.secondary,
+    marginTop: spacing.sm,
+    fontWeight: typography.weights.semibold,
   },
   timeValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginTop: 4,
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    color: colors.text.primary,
+    marginTop: spacing.xs,
   },
   timeDivider: {
-    width: 1,
-    height: 60,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 16,
+    width: 2,
+    height: 70,
+    backgroundColor: colors.gray[200],
+    marginHorizontal: spacing.md,
+    borderRadius: spacing.borderRadius.sm,
   },
 
   // Empty State
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 80,
+    marginTop: spacing.xxl * 2,
   },
   empty: { 
     textAlign: "center", 
-    color: "#999", 
-    fontSize: 16, 
-    marginTop: 16,
+    color: colors.text.secondary, 
+    fontSize: typography.sizes.md, 
+    marginTop: spacing.md,
+    fontWeight: typography.weights.medium,
   },
 
-  // Modal Styles (keep existing)
+  // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    maxHeight: '70%',
+    backgroundColor: colors.white,
+    borderTopLeftRadius: spacing.borderRadius.xl,
+    borderTopRightRadius: spacing.borderRadius.xl,
+    padding: spacing.xl,
+    maxHeight: '75%',
+    elevation: 20,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 2,
-    borderBottomColor: '#2979ff',
+    marginBottom: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 3,
+    borderBottomColor: colors.primary.main,
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2979ff',
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.primary.main,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.gray[50],
+    borderRadius: spacing.borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary.main,
   },
   detailText: {
-    marginLeft: 16,
+    marginLeft: spacing.md,
     flex: 1,
   },
   detailLabel: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: typography.sizes.xs,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+    fontWeight: typography.weights.semibold,
+    letterSpacing: 0.5,
   },
   detailValue: {
-    fontSize: 16,
-    color: '#222',
-    fontWeight: '600',
+    fontSize: typography.sizes.md,
+    color: colors.text.primary,
+    fontWeight: typography.weights.bold,
+  },
+  in: {
+    color: colors.success.main,
+  },
+  out: {
+    color: colors.error.main,
   },
 });

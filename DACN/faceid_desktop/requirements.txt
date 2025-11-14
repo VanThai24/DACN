@@ -1,6 +1,9 @@
-PySide6
-opencv-python
-requests
-numpy
-tensorflow
-mysql-connector-python
+PySide6>=6.6.0
+opencv-python>=4.8.0
+requests>=2.31.0
+numpy>=1.24.0
+mysql-connector-python>=8.2.0
+face-recognition>=1.3.0
+dlib>=19.24.0
+scikit-learn>=1.3.0
+joblib>=1.3.0

@@ -16,12 +16,41 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/", response_model=AttendanceRecord)
+@router.post("/")
 def create_attendance_api(attendance: AttendanceRecordCreate, db: Session = Depends(get_db)):
     """
     Ghi nhận một lượt điểm danh mới cho nhân viên.
+    Kiểm tra nếu đã điểm danh trong ngày sẽ trả về thông báo.
     """
-    return create_attendance(db, attendance)
+    from datetime import date
+    from backend_src.app.models.employee import AttendanceRecord as AttendanceRecordModel
+    
+    # Kiểm tra đã điểm danh trong ngày chưa
+    today = date.today()
+    existing = db.query(AttendanceRecordModel).filter(
+        AttendanceRecordModel.employee_id == attendance.employee_id,
+        func.date(AttendanceRecordModel.timestamp_in) == today
+    ).first()
+    
+    if existing:
+        # Đã điểm danh rồi
+        return {
+            "success": False,
+            "message": "Bạn đã điểm danh hôm nay rồi",
+            "already_checked_in": True,
+            "timestamp": existing.timestamp_in.isoformat(),
+            "attendance_id": existing.id
+        }
+    
+    # Chưa điểm danh, tạo mới
+    new_attendance = create_attendance(db, attendance)
+    return {
+        "success": True,
+        "message": "Điểm danh thành công",
+        "already_checked_in": False,
+        "timestamp": new_attendance.timestamp_in.isoformat(),
+        "attendance_id": new_attendance.id
+    }
 
 @router.get("/employee/{employee_id}", response_model=list[AttendanceRecord])
 def read_attendance(employee_id: int, db: Session = Depends(get_db)):
@@ -29,6 +58,34 @@ def read_attendance(employee_id: int, db: Session = Depends(get_db)):
     Lấy danh sách lịch sử điểm danh của một nhân viên.
     """
     return get_attendance(db, employee_id)
+
+@router.get("/check-today/{employee_id}")
+def check_today_attendance(employee_id: int, db: Session = Depends(get_db)):
+    """
+    Kiểm tra xem nhân viên đã điểm danh hôm nay chưa
+    """
+    from backend_src.app.models.employee import AttendanceRecord as AttendanceRecordModel
+    
+    today = date.today()
+    existing = db.query(AttendanceRecordModel).filter(
+        AttendanceRecordModel.employee_id == employee_id,
+        func.date(AttendanceRecordModel.timestamp_in) == today
+    ).first()
+    
+    if existing:
+        return {
+            "already_checked_in": True,
+            "message": "Đã điểm danh hôm nay",
+            "timestamp": existing.timestamp_in.isoformat(),
+            "attendance_id": existing.id
+        }
+    else:
+        return {
+            "already_checked_in": False,
+            "message": "Chưa điểm danh hôm nay",
+            "timestamp": None,
+            "attendance_id": None
+        }
 
 # API: Thống kê tổng số lượt điểm danh theo ngày/tháng
 @router.get("/stats/summary")

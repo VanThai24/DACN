@@ -23,9 +23,11 @@ class Employee(Base):
         """Automatically decrypt phone when accessed"""
         if self._phone:
             try:
-                return decrypt_data(self._phone)
+                # Convert to string if it's not already
+                phone_str = str(self._phone) if not isinstance(self._phone, str) else self._phone
+                return decrypt_data(phone_str)
             except:
-                return self._phone  # Return as-is if decryption fails (for migration compatibility)
+                return str(self._phone) if self._phone else self._phone  # Return as-is if decryption fails
         return self._phone
 
     @phone.setter
@@ -41,9 +43,11 @@ class Employee(Base):
         """Automatically decrypt email when accessed"""
         if self._email:
             try:
-                return decrypt_data(self._email)
+                # Convert to string if it's not already
+                email_str = str(self._email) if not isinstance(self._email, str) else self._email
+                return decrypt_data(email_str)
             except:
-                return self._email  # Return as-is if decryption fails (for migration compatibility)
+                return str(self._email) if self._email else self._email  # Return as-is if decryption fails
         return self._email
 
     @email.setter

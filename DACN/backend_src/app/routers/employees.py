@@ -4,6 +4,7 @@ from backend_src.app.schemas.employee import Employee, EmployeeCreate, EmployeeU
 from backend_src.app.crud.employee import get_employee, create_employee, lock_employee, unlock_employee
 from backend_src.app.config import settings
 from backend_src.app.cache import cache, get_employee_key, get_face_embedding_key, EMPLOYEE_PREFIX
+from backend_src.app.utils.email import send_new_employee_notification
 from loguru import logger
 import base64
 from sqlalchemy.orm import Session
@@ -152,6 +153,23 @@ def create_employee_api(
         "email": db_employee.email,
         "photo_path": db_employee.photo_path
     }
+    
+    # Send welcome email if email is provided
+    if db_employee.email:
+        try:
+            email_sent = send_new_employee_notification(
+                employee_name=db_employee.name,
+                employee_email=db_employee.email,
+                employee_id=db_employee.id,
+                department=db_employee.department
+            )
+            if email_sent:
+                logger.info(f"Welcome email sent to {db_employee.email}")
+            else:
+                logger.warning(f"Failed to send welcome email to {db_employee.email}")
+        except Exception as e:
+            logger.error(f"Error sending welcome email: {e}")
+            # Don't fail the employee creation if email fails
     
     # Invalidate employee list cache
     cache.delete_pattern(f"{EMPLOYEE_PREFIX}*")

@@ -23,38 +23,74 @@ class FaceIDApp(QWidget):
     
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("FaceID - Hệ Thống Điểm Danh Thông Minh")
-        self.resize(1000, 850)
-        self.setMinimumSize(800, 700)
+        self.setWindowTitle("Hệ Thống Chấm Công - DACN System")
+        self.resize(1200, 900)
+        self.setMinimumSize(1000, 800)
         
         # Main layout
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(20, 15, 20, 15)
-        main_layout.setSpacing(12)
+        main_layout.setContentsMargins(15, 10, 15, 10)
+        main_layout.setSpacing(8)
         
-        # === HEADER SECTION ===
+        # === HEADER SECTION - Clean modern design ===
         header_frame = QFrame()
         header_frame.setStyleSheet("""
             QFrame {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #2196F3, stop:0.5 #1976D2, stop:1 #0D47A1);
+                background: white;
                 border-radius: 12px;
-                padding: 12px;
+                padding: 15px;
+                border: 1px solid #e5e7eb;
             }
         """)
-        header_layout = QVBoxLayout()
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(15)
         
-        # Title
-        self.title = QLabel("🎯 HỆ THỐNG ĐIỂM DANH FACEID")
-        self.title.setAlignment(Qt.AlignCenter)
-        self.title.setFont(QFont("Segoe UI", 20, QFont.Bold))
-        self.title.setStyleSheet("color: white; padding: 3px;")
+        # Logo circle
+        logo_label = QLabel("👤")
+        logo_label.setAlignment(Qt.AlignCenter)
+        logo_label.setFont(QFont("Segoe UI", 24))
+        logo_label.setFixedSize(60, 60)
+        logo_label.setStyleSheet("""
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                stop:0 #3b82f6, stop:1 #8b5cf6);
+            border-radius: 30px;
+            color: white;
+        """)
         
-        # Clock
+        # Title and subtitle
+        title_layout = QVBoxLayout()
+        title_layout.setSpacing(5)
+        
+        self.title = QLabel("Hệ Thống Chấm Công")
+        self.title.setFont(QFont("Segoe UI", 18, QFont.Bold))
+        self.title.setStyleSheet("color: #1e293b;")
+        
+        subtitle = QLabel("Nhận diện khuôn mặt thông minh")
+        subtitle.setFont(QFont("Segoe UI", 11))
+        subtitle.setStyleSheet("color: #64748b;")
+        
+        title_layout.addWidget(self.title)
+        title_layout.addWidget(subtitle)
+        title_layout.addStretch()
+        
+        # Clock on the right
+        clock_layout = QVBoxLayout()
+        clock_layout.setSpacing(5)
+        
         self.clock_label = QLabel()
-        self.clock_label.setAlignment(Qt.AlignCenter)
-        self.clock_label.setFont(QFont("Segoe UI", 12))
-        self.clock_label.setStyleSheet("color: #E3F2FD; padding: 2px;")
+        self.clock_label.setAlignment(Qt.AlignRight)
+        self.clock_label.setFont(QFont("Segoe UI", 14, QFont.Bold))
+        self.clock_label.setStyleSheet("color: #1e293b;")
+        
+        self.date_label = QLabel()
+        self.date_label.setAlignment(Qt.AlignRight)
+        self.date_label.setFont(QFont("Segoe UI", 10))
+        self.date_label.setStyleSheet("color: #64748b;")
+        
+        clock_layout.addWidget(self.clock_label)
+        clock_layout.addWidget(self.date_label)
+        clock_layout.addStretch()
+        
         self.update_clock()
         
         # Timer để cập nhật đồng hồ
@@ -62,88 +98,98 @@ class FaceIDApp(QWidget):
         self.timer.timeout.connect(self.update_clock)
         self.timer.start(1000)
         
-        header_layout.addWidget(self.title)
-        header_layout.addWidget(self.clock_label)
+        header_layout.addWidget(logo_label)
+        header_layout.addLayout(title_layout, 1)
+        header_layout.addLayout(clock_layout)
+        
         header_frame.setLayout(header_layout)
         
-        # === INFO SECTION ===
-        info_frame = QFrame()
-        info_frame.setStyleSheet("""
+        # === STATUS SECTION - Clean card ===
+        status_frame = QFrame()
+        status_frame.setStyleSheet("""
             QFrame {
                 background: white;
                 border-radius: 12px;
-                border: 2px solid #E0E0E0;
+                padding: 12px;
+                border: 1px solid #e5e7eb;
             }
         """)
-        info_layout = QHBoxLayout()
-        info_layout.setContentsMargins(10, 8, 10, 8)
+        status_layout = QVBoxLayout()
+        status_layout.setSpacing(10)
         
-        # Status label
-        self.label = QLabel("📷 Sẵn sàng điểm danh - Nhấn nút để bắt đầu")
+        # Status label with icon
+        self.label = QLabel("📷 Sẵn sàng chấm công")
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setFont(QFont("Segoe UI", 12))
+        self.label.setFont(QFont("Segoe UI", 16, QFont.Bold))
         self.label.setWordWrap(True)
         self.label.setStyleSheet("""
-            color: #616161;
-            padding: 10px;
-            background: #F5F5F5;
-            border-radius: 8px;
+            color: #1e293b;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px dashed #cbd5e1;
         """)
         
-        info_layout.addWidget(self.label)
-        info_frame.setLayout(info_layout)
+        status_layout.addWidget(self.label)
+        status_frame.setLayout(status_layout)
         
-        # === CAMERA VIEW ===
+        # === CAMERA VIEW - Modern card ===
         camera_container = QFrame()
+        camera_container.setFixedHeight(380)
         camera_container.setStyleSheet("""
             QFrame {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #E3F2FD, stop:1 #BBDEFB);
-                border-radius: 20px;
-                border: 3px solid #2196F3;
-                padding: 10px;
+                background: white;
+                border-radius: 12px;
+                padding: 8px;
+                border: 1px solid #e5e7eb;
             }
         """)
         camera_layout = QVBoxLayout()
         camera_layout.setContentsMargins(0, 0, 0, 0)
+        camera_layout.setAlignment(Qt.AlignCenter)
         
         self.cam_view = QLabel()
-        self.cam_view.setMinimumSize(640, 400)
+        self.cam_view.setMinimumSize(650, 360)
+        self.cam_view.setMaximumSize(650, 360)
         self.cam_view.setAlignment(Qt.AlignCenter)
         self.cam_view.setStyleSheet("""
-            background: #263238;
+            background: #0f172a;
             border-radius: 12px;
-            color: #78909C;
-            font-size: 16px;
+            color: #94a3b8;
+            font-size: 18px;
+            padding: 40px;
         """)
-        self.cam_view.setText("📹 Camera chưa hoạt động")
+        self.cam_view.setText("📹 Camera chưa hoạt động\n\nNhấn nút bên dưới để bắt đầu")
         
         camera_layout.addWidget(self.cam_view)
         camera_container.setLayout(camera_layout)
         
         # === BUTTON SECTION ===
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(15)
+        button_layout.setSpacing(20)
         
-        self.cam_btn = QPushButton("🎥 BẬT CAMERA")
-        self.cam_btn.setFixedHeight(55)
+        self.cam_btn = QPushButton("🎥 Bật Camera")
+        self.cam_btn.setFixedHeight(60)
+        self.cam_btn.setFixedWidth(300)
         self.cam_btn.setFont(QFont("Segoe UI", 15, QFont.Bold))
         self.cam_btn.setCursor(Qt.PointingHandCursor)
         self.cam_btn.setStyleSheet("""
             QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #4CAF50, stop:1 #2E7D32);
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #3b82f6, stop:1 #8b5cf6);
                 color: white;
-                border-radius: 15px;
-                padding: 15px 40px;
+                border-radius: 30px;
+                padding: 0px 50px;
                 border: none;
+                font-weight: bold;
             }
             QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #66BB6A, stop:1 #4CAF50);
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #60a5fa, stop:1 #a78bfa);
             }
             QPushButton:pressed {
-                background: #1B5E20;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #2563eb, stop:1 #7c3aed);
             }
         """)
         self.cam_btn.clicked.connect(self.toggle_camera)
@@ -154,19 +200,23 @@ class FaceIDApp(QWidget):
         
         # Add all sections to main layout
         main_layout.addWidget(header_frame)
-        main_layout.addWidget(info_frame)
+        main_layout.addSpacing(3)
+        main_layout.addWidget(status_frame)
+        main_layout.addSpacing(5)
         main_layout.addWidget(camera_container)
+        main_layout.addSpacing(5)
         main_layout.addLayout(button_layout)
+        main_layout.addStretch()
         
         self.cap = None
         self.camera_running = False
         self.setLayout(main_layout)
         
-        # Background
+        # Clean background
         self.setStyleSheet("""
             QWidget {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #FAFAFA, stop:1 #ECEFF1);
+                background: #f8fafc;
+                font-family: 'Segoe UI', Arial, sans-serif;
             }
         """)
     
@@ -176,7 +226,8 @@ class FaceIDApp(QWidget):
         time_str = now.strftime("%H:%M:%S")
         date_str = now.strftime("%d/%m/%Y")
         day_str = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"][now.weekday()]
-        self.clock_label.setText(f"📅 {day_str}, {date_str} | ⏰ {time_str}")
+        self.clock_label.setText(time_str)
+        self.date_label.setText(f"{day_str}, {date_str}")
 
     def toggle_camera(self):
         # Import numpy trước
@@ -233,35 +284,37 @@ class FaceIDApp(QWidget):
                 """)
                 return
             self.camera_running = True
-            self.cam_btn.setText("⏹️ TẮT CAMERA")
+            self.cam_btn.setText("⏹️ Tắt Camera")
             self.cam_btn.setStyleSheet("""
                 QPushButton {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                        stop:0 #F44336, stop:1 #C62828);
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 #ef4444, stop:1 #dc2626);
                     color: white;
-                    border-radius: 15px;
-                    padding: 15px 40px;
+                    border-radius: 30px;
+                    padding: 0px 50px;
                     border: none;
                     font-weight: bold;
-                    font-size: 16px;
                 }
                 QPushButton:hover {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                        stop:0 #EF5350, stop:1 #F44336);
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 #f87171, stop:1 #ef4444);
                 }
                 QPushButton:pressed {
-                    background: #B71C1C;
+                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                        stop:0 #dc2626, stop:1 #b91c1c);
                 }
             """)
-            self.label.setText("✨ Camera đang hoạt động - Hãy nhìn thẳng vào camera")
+            self.label.setText("📹 Camera đang hoạt động")
             self.label.setStyleSheet("""
-                color: white;
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #4CAF50, stop:1 #2E7D32);
+                color: #1e293b;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #10b981, stop:1 #059669);
                 padding: 15px;
-                border-radius: 10px;
-                font-size: 13px;
+                border-radius: 12px;
+                font-size: 16px;
                 font-weight: bold;
+                border: 2px solid #34d399;
+                color: white;
             """)
             scanned = False
             from PySide6.QtGui import QImage, QPixmap
@@ -316,15 +369,16 @@ class FaceIDApp(QWidget):
                     h = bottom - top
                     faces.append([x, y, w, h])
                 if len(faces) > 0 and not scanned:
-                    self.label.setText("🔍 Đã phát hiện khuôn mặt! Đang xác thực bằng AI...")
+                    self.label.setText("🔍 Đã phát hiện khuôn mặt - Đang nhận diện...")
                     self.label.setStyleSheet("""
                         color: white;
-                        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                            stop:0 #FF9800, stop:1 #F57C00);
+                        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                            stop:0 #f59e0b, stop:1 #d97706);
                         padding: 15px;
-                        border-radius: 10px;
-                        font-size: 13px;
+                        border-radius: 12px;
+                        font-size: 16px;
                         font-weight: bold;
+                        border: 2px solid #fbbf24;
                     """)
                     (x, y, w, h) = faces[0]
                     face_img = rgb_frame[y:y+h, x:x+w]
@@ -388,14 +442,34 @@ class FaceIDApp(QWidget):
                                     current_time = now.time()
                                     current_date = now.date()
                                     
+                                    # 🔥 KIỂM TRA THỜI GIAN: Không cho phép điểm danh sau 16:30
+                                    if current_time > time(16, 30):
+                                        self.label.setText(
+                                            "⏰ NGOÀI GIỜ ĐIỂM DANH\n\n"
+                                            "Hệ thống chỉ cho phép điểm danh\n"
+                                            "từ 6:00 sáng đến 16:30 chiều"
+                                        )
+                                        self.label.setStyleSheet("""
+                                            color: white;
+                                            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 #ef4444, stop:1 #dc2626);
+                                            padding: 20px;
+                                            border-radius: 12px;
+                                            font-size: 16px;
+                                            font-weight: bold;
+                                            border: 2px solid #f87171;
+                                        """)
+                                        scanned = False
+                                        continue
+                                    
                                     # 🔥 TỰ ĐỘNG XÁC ĐỊNH CA LÀM VIỆC DựA VÀO GIỜ ĐIỂM DANH
                                     # Ca sáng: 6:00 - 12:30 → Ca làm: 7:00 - 11:30
-                                    # Ca chiều: 12:30 - 23:59 → Ca làm: 13:00 - 16:30
+                                    # Ca chiều: 12:30 - 16:30 → Ca làm: 13:00 - 16:30
                                     if time(6, 0) <= current_time < time(12, 30):
                                         shift_start = time(8, 30)
                                         shift_end = time(11, 30)
                                         shift_name = "Ca sáng"
-                                    else:  # Ca chiều/tối
+                                    else:  # Ca chiều
                                         shift_start = time(13, 30)
                                         shift_end = time(16, 30)
                                         shift_name = "Ca chiều"

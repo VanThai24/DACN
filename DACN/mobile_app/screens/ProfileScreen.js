@@ -1,15 +1,53 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, TextInput, Alert, ActivityIndicator, ScrollView } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, TextInput, Alert, ActivityIndicator, ScrollView, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from "axios";
-import { API_URL } from "../config";
+import { API_URL, SERVER_IP } from "../config";
+import { colors } from '../theme/colors';
+import { typography } from '../theme/typography';
+import { spacing } from '../theme/spacing';
 
 
 export default function ProfileScreen({ user, onLogout }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [editPhone, setEditPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 700,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      })
+    ]).start();
+
+    // Pulse animation for badge
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.15,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        })
+      ])
+    ).start();
+  }, []);
 
   // Fallbacks for missing fields
   const name = user?.full_name || user?.name || user?.username || "(Không rõ)";
@@ -18,16 +56,34 @@ export default function ProfileScreen({ user, onLogout }) {
   const role = user?.role || "(Chưa cập nhật)";
   const email = user?.email || "(Chưa cập nhật)";
   
-  // Ưu tiên lấy avatar từ user.avatar, nếu không có thì lấy user.photo_path hoặc user.photoPath
+  // Xử lý avatar
   let avatar = user?.avatar;
   if (!avatar) {
-    avatar = user?.photo_path || user?.photoPath;
-    // Nếu là đường dẫn tương đối, thêm domain
-    if (avatar && avatar.startsWith("/")) {
-      avatar = `http://${user?.server_ip || '192.168.110.45'}:8000${avatar}`;
+    const photoPath = user?.photo_path || user?.photoPath;
+    if (photoPath) {
+      if (photoPath.startsWith("http")) {
+        avatar = photoPath;
+      } else if (photoPath.startsWith("/")) {
+        avatar = `http://${SERVER_IP}:8000${photoPath}`;
+      } else {
+        avatar = `http://${SERVER_IP}:8000/photos/${photoPath}`;
+      }
     }
+  } else if (avatar.startsWith("/")) {
+    avatar = `http://${SERVER_IP}:8000${avatar}`;
   }
-  if (!avatar) avatar = "https://randomuser.me/api/portraits/men/32.jpg";
+  
+  // Fallback với avatar placeholder theo chữ cái đầu
+  if (!avatar) {
+    avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=200`;
+  }
+  
+  console.log('ProfileScreen - Avatar:', { 
+    username: user?.username,
+    user_avatar: user?.avatar,
+    photo_path: user?.photo_path,
+    final_avatar: avatar 
+  });
 
   const handleUpdatePhone = async () => {
     if (!editPhone || editPhone.length < 10) {
@@ -51,26 +107,33 @@ export default function ProfileScreen({ user, onLogout }) {
   };
 
   return (
-    <LinearGradient colors={["#667eea", "#764ba2"]} style={styles.gradient}>
+    <View style={styles.gradient}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
           {/* Profile Header */}
-          <View style={styles.header}>
+          <Animated.View style={[styles.header, { transform: [{ scale: scaleAnim }] }]}>
             <View style={styles.avatarContainer}>
-              <Image source={{ uri: avatar }} style={styles.avatar} />
-              <View style={styles.badge}>
-                <MaterialIcons name="verified" size={28} color="#667eea" />
-              </View>
+              <Image 
+                source={{ uri: avatar }} 
+                style={styles.avatar}
+                onError={(e) => console.log('ProfileScreen - Avatar load error:', e.nativeEvent.error)}
+                onLoad={() => console.log('ProfileScreen - Avatar loaded:', avatar)}
+              />
+              <Animated.View style={[styles.badge, { transform: [{ scale: pulseAnim }] }]}>
+                <MaterialIcons name="verified" size={24} color="#3b82f6" />
+              </Animated.View>
             </View>
             
             <Text style={styles.name}>{name}</Text>
             <Text style={styles.username}>@{user?.username}</Text>
-          </View>
+          </Animated.View>
           
           {/* Profile Info Card */}
           <View style={styles.card}>
             <View style={styles.infoRow}>
-              <MaterialIcons name="badge" size={24} color="#2979ff" />
+              <View style={[styles.iconCircle, { backgroundColor: '#e0f2fe' }]}>
+                <MaterialIcons name="badge" size={20} color="#3b82f6" />
+              </View>
               <View style={styles.infoText}>
                 <Text style={styles.label}>Họ tên</Text>
                 <Text style={styles.value}>{name}</Text>
@@ -78,7 +141,9 @@ export default function ProfileScreen({ user, onLogout }) {
             </View>
             
             <View style={styles.infoRow}>
-              <MaterialIcons name="business" size={24} color="#2979ff" />
+              <View style={[styles.iconCircle, { backgroundColor: '#f3e8ff' }]}>
+                <MaterialIcons name="business" size={20} color="#8b5cf6" />
+              </View>
               <View style={styles.infoText}>
                 <Text style={styles.label}>Phòng ban</Text>
                 <Text style={styles.value}>{department}</Text>
@@ -86,7 +151,9 @@ export default function ProfileScreen({ user, onLogout }) {
             </View>
             
             <View style={styles.infoRow}>
-              <MaterialIcons name="work" size={24} color="#2979ff" />
+              <View style={[styles.iconCircle, { backgroundColor: '#fce7f3' }]}>
+                <MaterialIcons name="work" size={20} color="#ec4899" />
+              </View>
               <View style={styles.infoText}>
                 <Text style={styles.label}>Chức vụ</Text>
                 <Text style={styles.value}>{role}</Text>
@@ -94,7 +161,9 @@ export default function ProfileScreen({ user, onLogout }) {
             </View>
             
             <View style={styles.infoRow}>
-              <MaterialIcons name="phone" size={24} color="#2979ff" />
+              <View style={[styles.iconCircle, { backgroundColor: '#d1fae5' }]}>
+                <MaterialIcons name="phone" size={20} color="#10b981" />
+              </View>
               <View style={styles.infoText}>
                 <Text style={styles.label}>Số điện thoại</Text>
                 <Text style={styles.value}>{phone}</Text>
@@ -103,12 +172,14 @@ export default function ProfileScreen({ user, onLogout }) {
                 setEditPhone(phone === "(Chưa cập nhật)" ? "" : phone);
                 setModalVisible(true);
               }}>
-                <MaterialIcons name="edit" size={20} color="#2979ff" />
+                <MaterialIcons name="edit" size={20} color="#3b82f6" />
               </TouchableOpacity>
             </View>
             
             <View style={styles.infoRow}>
-              <MaterialIcons name="email" size={24} color="#2979ff" />
+              <View style={[styles.iconCircle, { backgroundColor: '#fef3c7' }]}>
+                <MaterialIcons name="email" size={20} color="#f59e0b" />
+              </View>
               <View style={styles.infoText}>
                 <Text style={styles.label}>Email</Text>
                 <Text style={styles.value}>{email}</Text>
@@ -120,7 +191,7 @@ export default function ProfileScreen({ user, onLogout }) {
             <MaterialIcons name="logout" size={20} color="#fff" />
             <Text style={styles.buttonText}>Đăng xuất</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </ScrollView>
 
       <Modal
@@ -164,162 +235,184 @@ export default function ProfileScreen({ user, onLogout }) {
           </View>
         </View>
       </Modal>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: { flex: 1 },
+  gradient: { 
+    flex: 1, 
+    backgroundColor: '#f8fafc',
+  },
   scrollView: { flex: 1 },
   container: { 
     flex: 1, 
-    paddingBottom: 30,
+    paddingBottom: 24,
   },
   
   // Header Section
   header: {
     alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 30,
+    paddingTop: 60,
+    paddingBottom: 32,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   avatar: { 
-    width: 130, 
-    height: 130, 
-    borderRadius: 65, 
-    borderWidth: 5, 
-    borderColor: "#fff",
-    elevation: 8,
+    width: 120, 
+    height: 120, 
+    borderRadius: 60, 
+    borderWidth: 4, 
+    borderColor: '#fff',
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 8,
   },
   badge: {
     position: 'absolute',
-    bottom: 5,
-    right: 5,
+    bottom: 4,
+    right: 4,
     backgroundColor: '#fff',
-    borderRadius: 18,
+    borderRadius: 50,
     padding: 4,
-    elevation: 4,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   name: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 6,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 4,
     textAlign: 'center',
   },
   username: {
-    fontSize: 16,
-    color: '#ffffff90',
+    fontSize: 14,
+    color: '#64748b',
     marginBottom: 8,
+    fontWeight: '500',
   },
 
   // Card Section
   card: { 
-    backgroundColor: "#fff", 
-    borderTopLeftRadius: 32, 
-    borderTopRightRadius: 32, 
-    padding: 24, 
-    width: '100%',
-    minHeight: 400,
-    elevation: 8, 
-    shadowColor: '#2979ff', 
+    backgroundColor: '#fff', 
+    borderRadius: 16, 
+    padding: 20, 
+    marginHorizontal: 16,
+    marginTop: 8,
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08, 
-    shadowRadius: 8 
+    shadowRadius: 3 
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
-    backgroundColor: '#fafafa',
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 8,
+    borderBottomColor: '#f1f5f9',
   },
   infoText: {
     flex: 1,
-    marginLeft: 16,
   },
   label: { 
-    fontSize: 13, 
-    color: "#999",
+    fontSize: 11, 
+    color: '#64748b',
     marginBottom: 4,
     textTransform: 'uppercase',
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   value: { 
-    color: "#1a1a1a", 
-    fontSize: 17,
-    fontWeight: "600" 
+    color: '#0f172a', 
+    fontSize: 15,
+    fontWeight: '600' 
   },
   logoutButton: { 
-    width: "100%", 
-    backgroundColor: "#e53935",
-    marginTop: 20,
-    borderRadius: 16, 
+    backgroundColor: '#ef4444',
+    marginTop: 24,
+    marginHorizontal: 16,
+    borderRadius: 12, 
     padding: 16, 
     alignItems: "center",
     flexDirection: 'row',
     justifyContent: 'center',
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
   },
   button: { 
     width: "100%", 
-    backgroundColor: "#2979ff", 
+    backgroundColor: '#3b82f6', 
     borderRadius: 12, 
     padding: 16, 
     alignItems: "center",
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 16,
+    elevation: 3,
   },
   buttonText: { 
-    color: "#fff", 
-    fontSize: 17, 
-    fontWeight: "bold",
-    marginLeft: 8,
+    color: colors.white, 
+    fontSize: typography.sizes.md, 
+    fontWeight: typography.weights.bold,
+    marginLeft: spacing.sm,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: 24,
-    width: '85%',
+    backgroundColor: colors.white,
+    borderRadius: spacing.borderRadius.xl,
+    padding: spacing.xl,
+    width: '88%',
+    elevation: 20,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 2,
-    borderBottomColor: '#2979ff',
+    marginBottom: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 3,
+    borderBottomColor: colors.primary.main,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2979ff',
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.primary.main,
   },
   input: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginBottom: 8,
+    backgroundColor: colors.gray[50],
+    borderRadius: spacing.borderRadius.lg,
+    padding: spacing.md,
+    fontSize: typography.sizes.md,
+    borderWidth: 2,
+    borderColor: colors.gray[200],
+    marginBottom: spacing.sm,
   },
 });

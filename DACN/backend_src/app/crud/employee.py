@@ -2,6 +2,7 @@ from backend_src.app.models.employee import Employee, AttendanceRecord
 from backend_src.app.schemas.employee import EmployeeCreate, AttendanceRecordCreate, Employee as EmployeeSchema
 from backend_src.app.database import SessionLocal
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 def get_employee(db: Session, employee_id: int):
     return db.query(Employee).filter(Employee.id == employee_id).first()
@@ -17,6 +18,20 @@ def get_attendance(db: Session, employee_id: int):
     return db.query(AttendanceRecord).filter(AttendanceRecord.employee_id == employee_id).all()
 
 def create_attendance(db: Session, attendance: AttendanceRecordCreate):
+    from datetime import datetime, date
+    
+    # Kiểm tra xem nhân viên đã điểm danh trong ngày hôm nay chưa
+    today = date.today()
+    existing_attendance = db.query(AttendanceRecord).filter(
+        AttendanceRecord.employee_id == attendance.employee_id,
+        func.date(AttendanceRecord.timestamp_in) == today
+    ).first()
+    
+    if existing_attendance:
+        # Đã điểm danh rồi, trả về bản ghi cũ
+        return existing_attendance
+    
+    # Chưa điểm danh, tạo mới
     db_attendance = AttendanceRecord(**attendance.dict())
     db.add(db_attendance)
     db.commit()

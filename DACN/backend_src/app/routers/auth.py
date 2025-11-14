@@ -100,6 +100,18 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
                 status_code=status.HTTP_401_UNAUTHORIZED, 
                 detail="Sai tài khoản hoặc mật khẩu"
             )
+        
+        # Kiểm tra role - CHỈ employee/user mới được đăng nhập vào mobile app
+        # Admin và Manager chỉ dùng web
+        user_role = user.role.lower() if user.role else "employee"
+        if user_role in ['admin', 'manager']:
+            audit_logger.log_login_attempt(username, False, client_ip)
+            logger.warning(f"Mobile login blocked for {user.role} '{username}' from {client_ip}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Tài khoản Admin/Manager chỉ được đăng nhập trên Web. Vui lòng sử dụng tài khoản nhân viên để truy cập ứng dụng di động."
+            )
+        
         # Create tokens
         token_data = {
             "sub": str(user.id),
@@ -134,11 +146,15 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
         phone = employee.phone if employee and getattr(employee, "phone", None) else user.username
         avatar = None
         if employee and getattr(employee, "photo_path", None):
-            # Nếu photo_path đã có dấu / ở đầu thì giữ nguyên, nếu chỉ là tên file thì thêm /photos/
-            if employee.photo_path.startswith("/"):
-                avatar = employee.photo_path
-            else:
-                avatar = f"/photos/{employee.photo_path}"
+            photo_path = employee.photo_path.strip()
+            if photo_path:
+                # Nếu photo_path đã có dấu / ở đầu thì giữ nguyên, nếu chỉ là tên file thì thêm /photos/
+                if photo_path.startswith("/"):
+                    avatar = photo_path
+                else:
+                    avatar = f"/photos/{photo_path}"
+        
+        logger.info(f"Login success - User: {user.username}, Employee ID: {user.employee_id}, Avatar: {avatar}")
         return LoginResponse(
             id=user.id,
             username=user.username,
@@ -345,6 +361,77 @@ def change_password(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Đã xảy ra lỗi trong quá trình đổi mật khẩu"
+        )
+
+
+@router.get(
+    "/me",
+    response_model=LoginResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get current user info",
+    description="Get current authenticated user information"
+)
+def get_me(
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Lấy thông tin user hiện tại"""
+    try:
+        user_id = current_user.get("user_id")
+        user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Không tìm thấy người dùng"
+            )
+        
+        # Get employee info
+        employee = None
+        department = None
+        phone = None
+        avatar = None
+        
+        if user.employee_id:
+            employee = db.query(EmployeeModel).filter(EmployeeModel.id == user.employee_id).first()
+            if employee:
+                department = employee.department
+                phone = employee.phone
+                
+                # Construct avatar URL
+                if employee.photo_path:
+                    photo_path = employee.photo_path.strip()
+                    if photo_path:
+                        if photo_path.startswith("/"):
+                            avatar = photo_path
+                        else:
+                            avatar = f"/photos/{photo_path}"
+        
+        # Create dummy tokens (not used but required by response model)
+        access_token = create_access_token({"sub": str(user.id), "username": user.username, "role": user.role})
+        refresh_token = create_refresh_token({"sub": str(user.id), "username": user.username, "role": user.role})
+        
+        return LoginResponse(
+            id=user.id,
+            username=user.username,
+            full_name=user.full_name,
+            role=user.role,
+            employee_id=user.employee_id,
+            department=department,
+            phone=phone,
+            avatar=avatar,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer"
+        )
+    except HTTPException:
+        raise
+    except Exception as ex:
+        logger.error(f"Get me error: {ex}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Đã xảy ra lỗi khi lấy thông tin người dùng"
         )
 
 

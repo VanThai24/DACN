@@ -278,7 +278,6 @@ D:\DACN\DACN\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
 D:\DACN\DACN\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 D:\DACN\DACN\obj\Debug\net9.0\scopedcss\bundle\AdminWeb.styles.css
 D:\DACN\DACN\obj\Debug\net9.0\scopedcss\projectbundle\AdminWeb.bundle.scp.css
-D:\DACN\DACN\obj\Debug\net9.0\compressed\duxx2wdd5m-trt01dp7sw.gz
 D:\DACN\DACN\obj\Debug\net9.0\compressed\bd25g5xze3-61n19gt1b8.gz
 D:\DACN\DACN\obj\Debug\net9.0\compressed\rp8teqpitx-mr4bdju5si.gz
 D:\DACN\DACN\obj\Debug\net9.0\compressed\utp18tyz0s-bqjiyaj88i.gz
@@ -352,3 +351,4 @@ D:\DACN\DACN\obj\Debug\net9.0\refint\AdminWeb.dll
 D:\DACN\DACN\obj\Debug\net9.0\AdminWeb.pdb
 D:\DACN\DACN\obj\Debug\net9.0\AdminWeb.genruntimeconfig.cache
 D:\DACN\DACN\obj\Debug\net9.0\ref\AdminWeb.dll
+D:\DACN\DACN\obj\Debug\net9.0\compressed\duxx2wdd5m-umh70pifti.gz

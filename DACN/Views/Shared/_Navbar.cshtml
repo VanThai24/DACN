@@ -1,84 +1,129 @@
-<nav class="navbar navbar-expand-lg navbar-dark shadow rounded-pill modern-navbar mb-4 px-4 py-2" style="background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-        <ul class="navbar-nav flex-row gap-3 mx-auto">
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Admin/Dashboard">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Employees/Index">
-                    <i class="bi bi-people"></i> Nhân viên
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Admin/Reports">
-                    <i class="bi bi-bar-chart"></i> Báo cáo
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Devices/Index">
-                    <i class="bi bi-cpu"></i> Thiết bị
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Attendance/Index">
-                    <i class="bi bi-calendar-check"></i> Điểm danh
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Shifts/Index">
-                    <i class="bi bi-clock-history"></i> Ca làm
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Admin/Faces">
-                    <i class="bi bi-person-bounding-box"></i> Quản lý khuôn mặt
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center gap-1" href="/Users">
-                    <i class="bi bi-person-gear"></i> Người dùng
-                </a>
-            </li>
-        </ul>
-        <span class="navbar-text ms-3 d-flex align-items-center gap-3">
-            <span class="badge bg-light text-dark px-3 py-2">
-                <i class="bi bi-person-circle"></i> @Context.Session.GetString("User") 
-                <small>(@Context.Session.GetString("UserRole"))</small>
-            </span>
-            <a class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm" href="/Account/Logout">
+<nav class="navbar navbar-expand-lg modern-navbar mb-3 shadow-sm">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center flex-grow-1">
+            <a class="navbar-brand d-flex align-items-center me-4" href="/Admin/Dashboard">
+                <div class="icon-container icon-blue me-2">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <span class="fw-semibold">DACN System</span>
+            </a>
+            
+            <ul class="navbar-nav flex-row gap-2 flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link" href="/Admin/Dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Employees/Index">
+                        <i class="bi bi-people"></i> Nhân viên
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Admin/Reports">
+                        <i class="bi bi-bar-chart"></i> Báo cáo
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Devices/Index">
+                        <i class="bi bi-cpu"></i> Thiết bị
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Attendance/Index">
+                        <i class="bi bi-calendar-check"></i> Điểm danh
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Shifts/Index">
+                        <i class="bi bi-clock-history"></i> Ca làm
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Users">
+                        <i class="bi bi-person-gear"></i> Người dùng
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3 ms-auto">
+            <div class="user-badge">
+                <div class="icon-container icon-purple" style="width: 32px; height: 32px; font-size: 0.875rem; font-weight: 600;">
+                    @(Context.Session.GetString("User")?.Substring(0, 1) ?? "U")
+                </div>
+                <div class="ms-2">
+                    <div class="user-name">@Context.Session.GetString("User")</div>
+                    <div class="user-role">@Context.Session.GetString("UserRole")</div>
+                </div>
+            </div>
+            <a class="btn btn-danger btn-sm" href="/Account/Logout">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
             </a>
-        </span>
+        </div>
     </div>
 </nav>
+
 <style>
 .modern-navbar {
-    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 24px 0 rgba(78,84,200,0.10), 0 1.5px 4px 0 rgba(143,148,251,0.10);
+    background: white;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
 }
+
+.modern-navbar .navbar-brand {
+    color: var(--gray-900);
+    font-size: 1.125rem;
+    text-decoration: none;
+}
+
 .modern-navbar .nav-link {
-    color: #fff !important;
-    border-radius: 20px;
-    transition: background 0.2s, color 0.2s;
-    padding: 0.5rem 1.2rem;
+    color: var(--gray-600);
+    border-radius: 8px;
+    transition: all 0.15s ease;
+    padding: 0.5rem 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
 }
-.modern-navbar .nav-link:hover, .modern-navbar .nav-link.active {
-    background: rgba(255,255,255,0.15);
-    color: #ffe082 !important;
+
+.modern-navbar .nav-link:hover {
+    background: var(--gray-100);
+    color: var(--primary-color);
 }
-.modern-navbar .btn-danger {
-    background: linear-gradient(90deg, #ff5858 0%, #f09819 100%);
-    border: none;
-    color: #fff;
+
+.modern-navbar .nav-link.active {
+    background: var(--pastel-blue);
+    color: var(--primary-color);
+}
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+}
+
+.user-name {
+    font-size: 0.875rem;
     font-weight: 600;
-    box-shadow: 0 2px 8px 0 rgba(255,88,88,0.10);
+    color: var(--gray-900);
+    line-height: 1;
 }
-.modern-navbar .btn-danger:hover {
-    background: linear-gradient(90deg, #f09819 0%, #ff5858 100%);
-    color: #fff;
+
+.user-role {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    line-height: 1.2;
+}
+
+@@media (max-width: 1200px) {
+    .modern-navbar .nav-link {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.8125rem;
+    }
 }
 </style>
 <!-- Bootstrap Icons CDN -->
