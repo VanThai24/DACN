@@ -1,0 +1,49 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# AI Models (large files)
+*.pkl
+*.h5
+*.pth
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Node modules
+node_modules/
+.expo/
+.expo-shared/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+
+# Temporary
+*.tmp
+*.temp
+~*

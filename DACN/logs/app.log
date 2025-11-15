@@ -1557,3 +1557,65 @@ WHERE attendance_records.employee_id = %(employee_id_1)s]
 2025-11-15 06:56:46.664 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: wwwroot/photos
 2025-11-15 06:56:55.005 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: wwwroot/photos
 2025-11-15 06:57:07.611 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: wwwroot/photos
+2025-11-15 06:57:33.179 | INFO     | backend_src.app.main:<module>:46 - Mounting photos directory: wwwroot/photos
+2025-11-15 06:58:35.595 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:58:35.884 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 06:58:35.884 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 06:58:35.885 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 06:58:35.888 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 06:58:35.890 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 06:58:44.087 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-15 06:58:44.090 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 06:58:49.817 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:58:50.047 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 06:58:50.047 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 06:58:50.047 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 06:58:50.049 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 06:58:50.050 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 06:58:54.475 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:58:54.705 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 06:58:54.706 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 06:58:54.706 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 06:58:54.708 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 06:58:54.710 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 06:59:04.837 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:59:05.052 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 06:59:05.053 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 06:59:05.053 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 06:59:05.055 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 06:59:05.056 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 06:59:08.996 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:59:09.211 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 06:59:09.211 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 06:59:09.211 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 06:59:09.213 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 06:59:09.214 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 06:59:15.425 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:59:15.429 | WARNING  | backend_src.app.main:rate_limit_handler:61 - Rate limit exceeded for 127.0.0.1
+2025-11-15 06:59:15.429 | INFO     | backend_src.app.main:log_requests:88 - Response status: 429
+2025-11-15 06:59:19.445 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:59:19.449 | WARNING  | backend_src.app.main:rate_limit_handler:61 - Rate limit exceeded for 127.0.0.1
+2025-11-15 06:59:19.449 | INFO     | backend_src.app.main:log_requests:88 - Response status: 429
+2025-11-15 06:59:31.423 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:59:31.427 | WARNING  | backend_src.app.main:rate_limit_handler:61 - Rate limit exceeded for 127.0.0.1
+2025-11-15 06:59:31.428 | INFO     | backend_src.app.main:log_requests:88 - Response status: 429
+2025-11-15 06:59:39.914 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 06:59:40.128 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 06:59:40.128 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 06:59:40.129 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 06:59:40.131 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 06:59:40.132 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 06:59:58.597 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/faceid/scan from 127.0.0.1
+2025-11-15 06:59:58.600 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 07:00:04.179 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 07:00:04.396 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 07:00:04.397 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 07:00:04.397 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 07:00:04.398 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 07:00:04.399 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
+2025-11-15 07:00:15.488 | INFO     | backend_src.app.main:log_requests:85 - Request: POST http://localhost:8000/api/auth/login from 127.0.0.1
+2025-11-15 07:00:15.707 | INFO     | backend_src.app.security:log_login_attempt:349 - LOGIN SUCCESS: user=testuser, ip=127.0.0.1
+2025-11-15 07:00:15.707 | INFO     | backend_src.app.routers.auth:login:125 - Successful login for user 'testuser' (ID: 35) from 127.0.0.1
+2025-11-15 07:00:15.707 | ERROR    | backend_src.app.security:decrypt_data:110 - Decryption failed: 
+2025-11-15 07:00:15.709 | INFO     | backend_src.app.routers.auth:login:157 - Login success - User: testuser, Employee ID: None, Avatar: None
+2025-11-15 07:00:15.710 | INFO     | backend_src.app.main:log_requests:88 - Response status: 200
