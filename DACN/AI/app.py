@@ -164,7 +164,31 @@ def scan_face():
             """, (emp_id, current_date, shift_start, shift_end))
             shift_id = cursor.lastrowid
         
-        # Lưu attendance
+        # 🔥 KIỂM TRA TRÙNG: Xem nhân viên đã điểm danh ca này chưa
+        cursor.execute("""
+            SELECT id, timestamp_in FROM attendance_records
+            WHERE employee_id = %s 
+            AND shift_id = %s
+            LIMIT 1
+        """, (emp_id, shift_id))
+        existing_attendance = cursor.fetchone()
+        
+        if existing_attendance:
+            # Đã điểm danh ca này rồi
+            cursor.close()
+            db.close()
+            attendance_time = existing_attendance[1].strftime('%H:%M:%S')
+            return jsonify({
+                'success': False,
+                'reason': 'already_checked_in',
+                'message': f'Bạn đã điểm danh ca này lúc {attendance_time}',
+                'employee_id': emp_id,
+                'name': db_name,
+                'attendance_time': attendance_time,
+                'shift_id': shift_id
+            })
+        
+        # Chưa điểm danh, lưu attendance
         cursor.execute("""
             INSERT INTO attendance_records 
             (employee_id, timestamp_in, status, device_id, shift_id)

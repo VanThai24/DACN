@@ -499,6 +499,42 @@ class FaceIDApp(QWidget):
                                     
                                     shift_info = f"{shift_name}: {shift_start.strftime('%H:%M')}-{shift_end.strftime('%H:%M')}"
                                     
+                                    # 🔥 KIỂM TRA TRÙNG: Xem nhân viên đã điểm danh ca này chưa
+                                    cursor2.execute("""
+                                        SELECT id, timestamp_in FROM attendance_records
+                                        WHERE employee_id = %s 
+                                        AND shift_id = %s
+                                        LIMIT 1
+                                    """, (emp_match['id'], shift_id))
+                                    existing_attendance = cursor2.fetchone()
+                                    
+                                    if existing_attendance:
+                                        # Đã điểm danh ca này rồi
+                                        attendance_time = existing_attendance[1].strftime('%H:%M:%S')
+                                        cursor2.close()
+                                        db2.close()
+                                        
+                                        self.label.setText(
+                                            f"⚠️ BẠN ĐÃ ĐIỂM DANH!\n\n"
+                                            f"👤 {db_name}\n"
+                                            f"📅 {shift_info}\n"
+                                            f"⏰ Đã điểm danh lúc: {attendance_time}"
+                                        )
+                                        self.label.setStyleSheet("""
+                                            color: white;
+                                            background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                                stop:0 #f59e0b, stop:1 #d97706);
+                                            padding: 20px;
+                                            border-radius: 12px;
+                                            font-size: 14px;
+                                            font-weight: bold;
+                                            border: 2px solid #fbbf24;
+                                            line-height: 1.6;
+                                        """)
+                                        scanned = False
+                                        continue
+                                    
+                                    # Chưa điểm danh, lưu attendance
                                     cursor2.execute("""
                                         INSERT INTO attendance_records 
                                         (employee_id, timestamp_in, status, device_id, shift_id)
