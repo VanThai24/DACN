@@ -29,6 +29,30 @@
                     <label class="form-label"><strong>Giờ kết thúc:</strong></label>
                     <span class="form-control-plaintext">@(Model.EndTime.HasValue ? Model.EndTime.Value.ToString(@"hh\:mm") : "")</span>
                 </div>
+                <div class="form-group mb-3">
+                    <label class="form-label"><strong>Loại ca:</strong></label>
+                    <div class="form-control-plaintext">
+                        @if(Model.IsOvertime)
+                        {
+                            <span class="badge bg-warning text-dark fs-6">
+                                <i class="bi bi-clock-history"></i> Tăng Ca
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary fs-6">Ca Thường</span>
+                        }
+                    </div>
+                </div>
+                @if(Model.IsOvertime && !string.IsNullOrEmpty(Model.OvertimeNote))
+                {
+                    <div class="form-group mb-3">
+                        <label class="form-label"><strong>Ghi chú tăng ca:</strong></label>
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-info-circle"></i> @Model.OvertimeNote
+                        </div>
+                    </div>
+                }
                 <div class="mt-3">
                     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
                         <i class="bi bi-pencil"></i> Sửa

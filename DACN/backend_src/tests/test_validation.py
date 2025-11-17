@@ -2,8 +2,8 @@
 Tests for input validation
 """
 import pytest
-from backend_src.app.schemas.employee import EmployeeCreate, EmployeeUpdate
-from backend_src.app.schemas.auth import UserLogin, UserRegister, PasswordChange
+from app.schemas.employee import EmployeeCreate, EmployeeUpdate
+from app.schemas.auth import UserLogin, UserRegister, PasswordChange
 from pydantic import ValidationError
 
 

@@ -1,8 +1,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from backend_src.app.database import SessionLocal
-from backend_src.app.schemas.employee import AttendanceRecord, AttendanceRecordCreate
-from backend_src.app.crud.employee import get_attendance, create_attendance
+from app.database import SessionLocal
+from app.schemas.employee import AttendanceRecord, AttendanceRecordCreate
+from app.crud.employee import get_attendance, create_attendance
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date
@@ -23,7 +23,7 @@ def create_attendance_api(attendance: AttendanceRecordCreate, db: Session = Depe
     Kiểm tra nếu đã điểm danh trong ngày sẽ trả về thông báo.
     """
     from datetime import date
-    from backend_src.app.models.employee import AttendanceRecord as AttendanceRecordModel
+    from app.models.employee import AttendanceRecord as AttendanceRecordModel
     
     # Kiểm tra đã điểm danh trong ngày chưa
     today = date.today()
@@ -52,10 +52,10 @@ def create_attendance_api(attendance: AttendanceRecordCreate, db: Session = Depe
         "attendance_id": new_attendance.id
     }
 
-@router.get("/employee/{employee_id}", response_model=list[AttendanceRecord])
+@router.get("/employee/{employee_id}")
 def read_attendance(employee_id: int, db: Session = Depends(get_db)):
     """
-    Lấy danh sách lịch sử điểm danh của một nhân viên.
+    Lấy danh sách lịch sử điểm danh của một nhân viên bao gồm thông tin ca làm việc.
     """
     return get_attendance(db, employee_id)
 
@@ -64,7 +64,7 @@ def check_today_attendance(employee_id: int, db: Session = Depends(get_db)):
     """
     Kiểm tra xem nhân viên đã điểm danh hôm nay chưa
     """
-    from backend_src.app.models.employee import AttendanceRecord as AttendanceRecordModel
+    from app.models.employee import AttendanceRecord as AttendanceRecordModel
     
     today = date.today()
     existing = db.query(AttendanceRecordModel).filter(

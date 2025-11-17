@@ -10,7 +10,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
-from backend_src.app.security import encrypt_data, decrypt_data
+from app.security import encrypt_data, decrypt_data
 
 
 # revision identifiers, used by Alembic.

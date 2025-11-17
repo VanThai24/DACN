@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, status
-from backend_src.app.database import SessionLocal
-from backend_src.app.schemas.employee import Employee, EmployeeCreate, EmployeeUpdate
-from backend_src.app.crud.employee import get_employee, create_employee, lock_employee, unlock_employee
-from backend_src.app.config import settings
-from backend_src.app.cache import cache, get_employee_key, get_face_embedding_key, EMPLOYEE_PREFIX
-from backend_src.app.utils.email import send_new_employee_notification
+from app.database import SessionLocal
+from app.schemas.employee import Employee, EmployeeCreate, EmployeeUpdate
+from app.crud.employee import get_employee, create_employee, lock_employee, unlock_employee
+from app.config import settings
+from app.cache import cache, get_employee_key, get_face_embedding_key, EMPLOYEE_PREFIX
+from app.utils.email import send_new_employee_notification
 from loguru import logger
 import base64
 from sqlalchemy.orm import Session
@@ -88,7 +88,7 @@ def create_employee_api(
     """Create a new employee with validated data"""
     # Check if phone already exists
     if employee.phone:
-        from backend_src.app.models.employee import Employee as EmployeeModel
+        from app.models.employee import Employee as EmployeeModel
         existing = db.query(EmployeeModel).filter_by(phone=employee.phone).first()
         if existing:
             raise HTTPException(

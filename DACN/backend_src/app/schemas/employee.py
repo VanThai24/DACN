@@ -85,4 +85,7 @@ class AttendanceRecordCreate(AttendanceRecordBase):
 
 class AttendanceRecord(AttendanceRecordBase):
     id: int
+    start_time: Optional[str] = None  # Giờ bắt đầu ca
+    end_time: Optional[str] = None    # Giờ kết thúc ca
+    device_id: Optional[int] = None   # ID thiết bị
     model_config = ConfigDict(from_attributes=True)

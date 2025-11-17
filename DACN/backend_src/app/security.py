@@ -17,8 +17,8 @@ from html import escape
 from cryptography.fernet import Fernet
 import base64
 
-from backend_src.app.config import settings
-from backend_src.app.database import get_db
+from app.config import settings
+from app.database import get_db
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -38,11 +38,17 @@ api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 def hash_password(password: str) -> str:
     """Hash password using bcrypt"""
+    # Bcrypt has a 72 byte limit, truncate if needed
+    if len(password.encode('utf-8')) > 72:
+        password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash"""
+    # Bcrypt has a 72 byte limit, truncate if needed
+    if len(plain_password.encode('utf-8')) > 72:
+        plain_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.verify(plain_password, hashed_password)
 
 

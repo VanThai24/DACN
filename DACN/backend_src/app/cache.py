@@ -10,7 +10,7 @@ from functools import wraps
 import redis
 from loguru import logger
 
-from backend_src.app.config import settings
+from app.config import settings
 
 
 class RedisCache:

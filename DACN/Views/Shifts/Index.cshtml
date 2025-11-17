@@ -20,6 +20,7 @@
                             <th>Ngày</th>
                             <th>Bắt đầu</th>
                             <th>Kết thúc</th>
+                            <th>Tăng Ca</th>
                             <th>Hành động</th>
                         </tr>
                     </thead>
@@ -32,6 +33,22 @@
                                 <td>@(s.Date?.ToString("dd/MM/yyyy"))</td>
                                 <td>@(s.StartTime.HasValue ? s.StartTime.Value.ToString(@"hh\:mm") : "")</td>
                                 <td>@(s.EndTime.HasValue ? s.EndTime.Value.ToString(@"hh\:mm") : "")</td>
+                                <td>
+                                    @if(s.IsOvertime)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-clock-history"></i> Tăng Ca
+                                        </span>
+                                        @if(!string.IsNullOrEmpty(s.OvertimeNote))
+                                        {
+                                            <br/><small class="text-muted">@s.OvertimeNote</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ca thường</span>
+                                    }
+                                </td>
                                 <td>
                                     <a asp-action="Details" asp-route-id="@s.Id" class="btn btn-sm btn-info">
                                         <i class="bi bi-eye"></i>

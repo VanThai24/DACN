@@ -3,7 +3,7 @@ Tests for file upload validation
 """
 import pytest
 from fastapi import UploadFile, HTTPException
-from backend_src.app.validators import FileValidator, validate_face_image
+from app.validators import FileValidator, validate_face_image
 from io import BytesIO
 from PIL import Image
 

@@ -6,7 +6,7 @@ from typing import List
 import os
 from PIL import Image
 import io
-from backend_src.app.config import settings
+from app.config import settings
 
 
 class FileValidator:

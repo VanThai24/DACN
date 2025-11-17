@@ -1,9 +1,9 @@
-from backend_src.app.models.device import Device
-from backend_src.app.database import Base
+from app.models.device import Device
+from app.database import Base
 from sqlalchemy import Column, Integer, String, LargeBinary, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from backend_src.app.security import encrypt_data, decrypt_data
+from app.security import encrypt_data, decrypt_data
 
 class Employee(Base):
     __tablename__ = "employees"

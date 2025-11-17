@@ -34,25 +34,29 @@ function mergeAttendanceWithWorkdays(records) {
   const now = new Date();
   now.setHours(0, 0, 0, 0); // Reset time để so sánh ngày
   
-  // Tạo map từ records hiện có
+  // Tạo map từ records hiện có (bao gồm cả records ngoài giờ làm việc)
   const recordMap = new Map();
+  const allRecords = []; // Lưu tất cả records thực tế
+  
   records.forEach(r => {
     if (r.timestamp_in) {
       const d = new Date(r.timestamp_in);
       const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
       recordMap.set(dateKey, r);
+      allRecords.push(r);
     }
   });
   
-  // Tạo danh sách đầy đủ
-  const fullList = workdays.map(workday => {
+  // Tạo danh sách ngày làm việc với trạng thái vắng/tương lai
+  const workdayList = workdays.map(workday => {
     const dateKey = `${workday.getFullYear()}-${workday.getMonth()}-${workday.getDate()}`;
     const existingRecord = recordMap.get(dateKey);
     
     if (existingRecord) {
+      recordMap.delete(dateKey); // Xóa để không bị trùng
       return existingRecord;
-    } else if (workday < now) {
-      // Ngày đã qua mà không có dữ liệu = VẮNG
+    } else if (workday <= now) {
+      // Ngày đã qua hoặc hôm nay mà không có dữ liệu = VẮNG
       return {
         id: `absent-${dateKey}`,
         timestamp_in: workday.toISOString(),
@@ -60,7 +64,7 @@ function mergeAttendanceWithWorkdays(records) {
         isAbsent: true
       };
     } else {
-      // Ngày chưa đến
+      // Ngày chưa đến (tương lai)
       return {
         id: `future-${dateKey}`,
         timestamp_in: workday.toISOString(),
@@ -70,8 +74,14 @@ function mergeAttendanceWithWorkdays(records) {
     }
   });
   
-  // Sắp xếp mới nhất trước
-  return fullList.reverse();
+  // Thêm các records còn lại (thứ 7/CN - làm ngoài giờ)
+  const weekendRecords = Array.from(recordMap.values());
+  const fullList = [...workdayList, ...weekendRecords];
+  
+  // Sắp xếp theo ngày, mới nhất trước
+  fullList.sort((a, b) => new Date(b.timestamp_in) - new Date(a.timestamp_in));
+  
+  return fullList;
 }
 
 function getMonthStats(records) {
@@ -297,6 +307,11 @@ export default function AttendanceScreen({ user }) {
                     <View style={styles.cardDateBadge}>
                       <MaterialIcons name={item.isFuture ? "schedule" : "calendar-today"} size={18} color={item.isFuture ? "#999" : "#667eea"} />
                       <Text style={[styles.cardDate, item.isFuture && styles.futureText]}>{formatDateTime(item.timestamp_in).split(' ')[0]}</Text>
+                      {item.is_overtime && (
+                        <View style={styles.overtimeBadge}>
+                          <Text style={styles.overtimeText}>Tăng ca</Text>
+                        </View>
+                      )}
                     </View>
                     <View style={[styles.statusBadge, statusBadgeStyle]}>
                       <MaterialIcons name={statusIcon} size={16} color="#fff" style={{marginRight: 4}} />
@@ -370,7 +385,9 @@ export default function AttendanceScreen({ user }) {
                       <MaterialIcons name="login" size={24} color="#43a047" />
                       <View style={styles.detailText}>
                         <Text style={styles.detailLabel}>Giờ vào ca</Text>
-                        <Text style={styles.detailValue}>{selectedRecord.start_time || "-"}</Text>
+                        <Text style={styles.detailValue}>
+                          {selectedRecord.timestamp_in ? formatDateTime(selectedRecord.timestamp_in).split(' ')[1] : "-"}
+                        </Text>
                       </View>
                     </View>
                     <View style={styles.detailRow}>
@@ -403,6 +420,24 @@ export default function AttendanceScreen({ user }) {
                         <Text style={styles.detailValue}>{selectedRecord.device_id || "N/A"}</Text>
                       </View>
                     </View>
+                    {selectedRecord.is_overtime && (
+                      <View style={styles.detailRow}>
+                        <MaterialIcons name="alarm-on" size={24} color="#ff6f00" />
+                        <View style={styles.detailText}>
+                          <Text style={styles.detailLabel}>Loại ca</Text>
+                          <Text style={[styles.detailValue, {color: '#ff6f00', fontWeight: '600'}]}>Tăng ca</Text>
+                        </View>
+                      </View>
+                    )}
+                    {selectedRecord.overtime_note && (
+                      <View style={styles.detailRow}>
+                        <MaterialIcons name="note" size={24} color="#757575" />
+                        <View style={styles.detailText}>
+                          <Text style={styles.detailLabel}>Ghi chú tăng ca</Text>
+                          <Text style={styles.detailValue}>{selectedRecord.overtime_note}</Text>
+                        </View>
+                      </View>
+                    )}
                   </>
                 )}
               </ScrollView>
@@ -533,12 +568,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    gap: 6,
   },
   cardDate: {
     fontSize: 13,
     fontWeight: '700',
     color: '#3b82f6',
     marginLeft: 4,
+  },
+  overtimeBadge: {
+    backgroundColor: '#fff3e0',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#ff6f00',
+  },
+  overtimeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#ff6f00',
   },
   statusBadge: {
     flexDirection: 'row',

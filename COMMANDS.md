@@ -22,11 +22,29 @@ npm start
 # Ấn 'a' để mở Android emulator
 ```
 
+**Lưu ý**: Nếu mobile app không kết nối được backend:
+1. Kiểm tra IP máy: `ipconfig | Select-String -Pattern "IPv4"`
+2. Cập nhật IP trong file `mobile_app/config.js`:
+   ```javascript
+   export const SERVER_IP = "10.10.74.235"; // Thay bằng IP của bạn
+   ```
+3. Đảm bảo backend đang chạy trên port 8000
+4. Kiểm tra firewall không chặn port 8000
+
 ### Backend API (FastAPI)
 ```bash
+# Cách 1: Sử dụng batch file (Khuyến nghị)
+D:\DACN\DACN\backend_src\start_backend.bat
+
+# Cách 2: Sử dụng PowerShell script
+D:\DACN\DACN\backend_src\start_server.ps1
+
+# Cách 3: Chạy trực tiếp
 cd D:\DACN\DACN\backend_src
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+**Lưu ý**: Backend sẽ chạy trên `http://localhost:8000` và API docs tại `http://localhost:8000/docs`
 
 ---
 
@@ -153,11 +171,31 @@ TRUNCATE TABLE attendance_records;
 
 ## 🐛 Troubleshooting
 
+### Mobile app không kết nối được backend
+```bash
+# 1. Kiểm tra IP máy
+ipconfig | Select-String -Pattern "IPv4"
+
+# 2. Kiểm tra backend đang chạy
+Invoke-WebRequest -Uri "http://localhost:8000/health"
+
+# 3. Test kết nối từ IP thật
+Invoke-WebRequest -Uri "http://10.10.74.235:8000/health"
+
+# 4. Kiểm tra firewall
+netsh advfirewall firewall add rule name="Backend API" dir=in action=allow protocol=TCP localport=8000
+```
+
+**Sửa file `mobile_app/config.js`:**
+```javascript
+export const SERVER_IP = "10.10.74.235"; // Thay bằng IP của bạn
+```
+
 ### Fix JWT error trong Desktop app
 ```bash
 # Start backend API trước
 cd D:\DACN\DACN\backend_src
-uvicorn app.main:app --reload
+D:\DACN\DACN\backend_src\start_backend.bat
 ```
 
 ### Fix module not found

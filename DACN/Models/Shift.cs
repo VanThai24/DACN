@@ -17,5 +17,10 @@ namespace Models
     public TimeSpan? StartTime { get; set; }
     [Column("end_time")]
     public TimeSpan? EndTime { get; set; }
+    [Column("is_overtime")]
+    public bool IsOvertime { get; set; } = false;
+    [Column("overtime_note")]
+    [StringLength(500)]
+    public string? OvertimeNote { get; set; }
     }
 }

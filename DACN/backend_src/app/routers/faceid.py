@@ -3,11 +3,11 @@ from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from backend_src.app.schemas.faceid import (
+from app.schemas.faceid import (
     FaceAddResponse, FaceRecognitionResponse, FaceDeleteRequest
 )
-from backend_src.app.validators import validate_face_image
-from backend_src.app.config import settings
+from app.validators import validate_face_image
+from app.config import settings
 from jose import jwt, JWTError
 from loguru import logger
 import numpy as np

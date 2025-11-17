@@ -1,9 +1,9 @@
-from backend_src.app.database import SessionLocal
-from backend_src.app.models.employee import Employee, AttendanceRecord
-from backend_src.app.models.user import User
-from backend_src.app.models.device import Device
-from backend_src.app.models.shift import Shift
-from backend_src.app.models.report import Report
+from app.database import SessionLocal
+from app.models.employee import Employee, AttendanceRecord
+from app.models.user import User
+from app.models.device import Device
+from app.models.shift import Shift
+from app.models.report import Report
 from datetime import datetime, time
 
 def seed():

@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from backend_src.app.routers import employees, attendance, auth, faceid
-from backend_src.app.config import settings, ensure_upload_folder, ensure_log_folder
-from backend_src.app.middleware import (
+from app.routers import employees, attendance, auth, faceid
+from app.config import settings, ensure_upload_folder, ensure_log_folder
+from app.middleware import (
     validation_exception_handler,
     general_exception_handler,
     http_exception_handler

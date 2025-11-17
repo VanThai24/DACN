@@ -23,7 +23,9 @@ namespace Controllers
                           EmployeeName = e.Name,
                           Date = s.Date,
                           StartTime = s.StartTime,
-                          EndTime = s.EndTime
+                          EndTime = s.EndTime,
+                          IsOvertime = s.IsOvertime,
+                          OvertimeNote = s.OvertimeNote
                       })
                 .ToList();
             return View(shifts);
@@ -41,7 +43,9 @@ namespace Controllers
                           EmployeeName = e.Name,
                           Date = s.Date,
                           StartTime = s.StartTime,
-                          EndTime = s.EndTime
+                          EndTime = s.EndTime,
+                          IsOvertime = s.IsOvertime,
+                          OvertimeNote = s.OvertimeNote
                       })
                 .FirstOrDefault();
             

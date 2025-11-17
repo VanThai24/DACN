@@ -3,7 +3,7 @@ Unit tests for authentication endpoints
 """
 import pytest
 from fastapi.testclient import TestClient
-from backend_src.app.main import app
+from app.main import app
 
 client = TestClient(app)
 

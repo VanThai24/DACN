@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
-from backend_src.app.config import settings
+from app.config import settings
 from loguru import logger
 
 # Use settings from config

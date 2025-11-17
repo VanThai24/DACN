@@ -2,7 +2,7 @@
 Configuration tests
 """
 import pytest
-from backend_src.app.config import settings, is_development, is_production
+from app.config import settings, is_development, is_production
 
 
 def test_settings_loaded():

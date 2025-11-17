@@ -37,6 +37,19 @@
                         <input asp-for="EndTime" class="form-control" type="time" required />
                         <span asp-validation-for="EndTime" class="text-danger"></span>
                     </div>
+                    <div class="form-group mb-3">
+                        <div class="form-check">
+                            <input asp-for="IsOvertime" class="form-check-input" type="checkbox" id="isOvertimeCheck" />
+                            <label class="form-check-label" for="isOvertimeCheck">
+                                <i class="bi bi-clock-history text-warning"></i> Đánh dấu là ca tăng ca
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3" id="overtimeNoteGroup">
+                        <label for="OvertimeNote" class="form-label">Ghi chú tăng ca (tùy chọn)</label>
+                        <textarea asp-for="OvertimeNote" class="form-control" rows="3" placeholder="VD: Tăng ca đột xuất, Deadline dự án, Làm thêm cuối tuần..."></textarea>
+                        <small class="text-muted">Ghi chú thêm về lý do tăng ca</small>
+                    </div>
                     <div class="mt-3">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Lưu

@@ -86,6 +86,33 @@ function getAbsentDays(records) {
   return absentCount;
 }
 
+// Tính tổng số giờ làm việc thực tế trong tháng
+function getTotalWorkHours(records) {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  let totalHours = 0;
+  
+  records.forEach(r => {
+    const d = new Date(r.timestamp_in);
+    if (d.getMonth() === month && d.getFullYear() === year) {
+      // Nếu có timestamp_out, tính giờ làm thực tế
+      if (r.timestamp_out) {
+        const timeIn = new Date(r.timestamp_in);
+        const timeOut = new Date(r.timestamp_out);
+        const diffMs = timeOut - timeIn;
+        const hours = diffMs / (1000 * 60 * 60);
+        totalHours += hours;
+      } else {
+        // Nếu chưa checkout, giả định làm 8 giờ
+        totalHours += 8;
+      }
+    }
+  });
+  
+  return Math.round(totalHours);
+}
+
 export default function HomeScreen({ user, navigation }) {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -174,6 +201,7 @@ export default function HomeScreen({ user, navigation }) {
   const { ontime, late } = getCheckinStats(records);
   const absentDays = getAbsentDays(records);
   const totalWorkdays = getWorkdaysInMonth();
+  const totalWorkHours = getTotalWorkHours(records);
   const total = ontime + late;
   const ontimePercent = total > 0 ? Math.round((ontime / total) * 100) : 0;
 
@@ -266,7 +294,7 @@ export default function HomeScreen({ user, navigation }) {
                   </View>
                   <View style={styles.detailStatCard}>
                     <MaterialIcons name="schedule" size={20} color="#64748b" />
-                    <Text style={styles.detailStatNumber}>{monthDays * 8}h</Text>
+                    <Text style={styles.detailStatNumber}>{totalWorkHours}h</Text>
                     <Text style={styles.detailStatLabel}>Tổng giờ</Text>
                   </View>
                 </View>
