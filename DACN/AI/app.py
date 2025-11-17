@@ -15,9 +15,15 @@ import face_recognition
 from PIL import Image
 import mysql.connector
 from datetime import datetime, time as dt_time
+from anti_spoofing import AntiSpoofing
+from mask_detection import MaskDetector
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS cho mobile app
+
+# Initialize security modules
+anti_spoofing = AntiSpoofing(threshold=0.7)
+mask_detector = MaskDetector(threshold=0.6)
 
 # 🔥 Load Best Model
 MODEL_PATH = os.path.join(os.path.dirname(__file__), 'faceid_best_model.pkl')
@@ -74,6 +80,7 @@ def index():
 def scan_face():
     """
     Nhận diện khuôn mặt và tự động lưu attendance
+    Bao gồm: Anti-spoofing và Mask Detection
     """
     try:
         # Get image
@@ -84,6 +91,27 @@ def scan_face():
         else:
             return jsonify({'success': False, 'reason': 'No image provided'}), 400
         
+        # 🔒 BƯỚC 1: Anti-Spoofing Detection
+        spoofing_result = anti_spoofing.detect(img_bytes)
+        if not spoofing_result['is_real']:
+            return jsonify({
+                'success': False,
+                'reason': 'spoofing_detected',
+                'message': 'Phát hiện giả mạo! Vui lòng sử dụng khuôn mặt thật.',
+                'anti_spoofing': spoofing_result
+            }), 403
+        
+        # 😷 BƯỚC 2: Mask Detection
+        mask_result = mask_detector.detect(img_bytes)
+        if mask_result['wearing_mask']:
+            return jsonify({
+                'success': False,
+                'reason': 'wearing_mask',
+                'message': 'Vui lòng tháo khẩu trang để điểm danh.',
+                'mask_detection': mask_result
+            }), 403
+        
+        # ✅ BƯỚC 3: Face Recognition
         # Extract embedding
         query_embedding = extract_embedding(img_bytes)
         
@@ -205,7 +233,17 @@ def scan_face():
             'name': db_name,
             'confidence': confidence,
             'attendance_saved': True,
-            'timestamp': now.isoformat()
+            'timestamp': now.isoformat(),
+            'security': {
+                'anti_spoofing': {
+                    'passed': True,
+                    'confidence': spoofing_result['confidence']
+                },
+                'mask_detection': {
+                    'passed': True,
+                    'wearing_mask': False
+                }
+            }
         })
         
     except Exception as e:
@@ -255,6 +293,44 @@ def get_employee_attendance(emp_id):
         
         return jsonify(records)
         
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/security/anti-spoofing', methods=['POST'])
+def check_anti_spoofing():
+    """
+    API riêng để test Anti-Spoofing
+    """
+    try:
+        if 'image' in request.files:
+            img_bytes = request.files['image'].read()
+        elif 'image' in request.json:
+            img_bytes = base64.b64decode(request.json['image'])
+        else:
+            return jsonify({'error': 'No image provided'}), 400
+        
+        result = anti_spoofing.detect(img_bytes)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/security/mask-detection', methods=['POST'])
+def check_mask_detection():
+    """
+    API riêng để test Mask Detection
+    """
+    try:
+        if 'image' in request.files:
+            img_bytes = request.files['image'].read()
+        elif 'image' in request.json:
+            img_bytes = base64.b64decode(request.json['image'])
+        else:
+            return jsonify({'error': 'No image provided'}), 400
+        
+        result = mask_detector.detect(img_bytes)
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

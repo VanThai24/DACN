@@ -25,7 +25,12 @@ class Employee(Base):
             try:
                 # Convert to string if it's not already
                 phone_str = str(self._phone) if not isinstance(self._phone, str) else self._phone
-                return decrypt_data(phone_str)
+                # Check if it looks like encrypted data (starts with 'gAAAAA')
+                if phone_str.startswith('gAAAAA'):
+                    return decrypt_data(phone_str)
+                else:
+                    # Plain text data - return as is (backward compatibility)
+                    return phone_str
             except:
                 return str(self._phone) if self._phone else self._phone  # Return as-is if decryption fails
         return self._phone
@@ -45,7 +50,12 @@ class Employee(Base):
             try:
                 # Convert to string if it's not already
                 email_str = str(self._email) if not isinstance(self._email, str) else self._email
-                return decrypt_data(email_str)
+                # Check if it looks like encrypted data (starts with 'gAAAAA')
+                if email_str.startswith('gAAAAA'):
+                    return decrypt_data(email_str)
+                else:
+                    # Plain text data - return as is (backward compatibility)
+                    return email_str
             except:
                 return str(self._email) if self._email else self._email  # Return as-is if decryption fails
         return self._email

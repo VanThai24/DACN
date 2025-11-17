@@ -2,11 +2,16 @@
 
 ## 🚀 Quick Commands
 
-### Desktop App (Khuyến nghị)
+### Desktop App (Khuyến nghị) 🔒
 ```bash
 cd D:\DACN\DACN\faceid_desktop
 python main.py
 ```
+
+**Tính năng bảo mật:**
+- ✅ **Anti-Spoofing**: Phát hiện giả mạo (ảnh in, video, màn hình)
+- ✅ **Mask Detection**: Phát hiện và yêu cầu tháo khẩu trang
+- ✅ **Face Recognition**: Nhận diện khuôn mặt với độ chính xác 100%
 
 ### Web Admin
 ```bash

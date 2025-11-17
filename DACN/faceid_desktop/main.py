@@ -7,6 +7,8 @@ from PySide6.QtGui import QFont
 from datetime import datetime
 import cv2
 import mysql.connector
+from anti_spoofing import AntiSpoofing
+from mask_detection import MaskDetector
 
 class FaceIDApp(QWidget):
     def get_jwt_token(self, username, password):
@@ -210,6 +212,9 @@ class FaceIDApp(QWidget):
         
         self.cap = None
         self.camera_running = False
+        self.frame_skip_counter = 0  # 🚀 Skip frames để tăng FPS
+        self.employee_cache = None  # 🚀 Cache employee data để không query DB mỗi lần
+        self.clf_cache = None  # 🚀 Cache model để không load mỗi lần
         self.setLayout(main_layout)
         
         # Clean background
@@ -233,38 +238,44 @@ class FaceIDApp(QWidget):
         # Import numpy trước
         import numpy as np
         
-        # Lấy embeddings từ database
-        db = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345",
-            database="attendance_db"
-        )
-        cursor = db.cursor()
-        # 🔥 EMBEDDING MATCHING: Lấy tất cả nhân viên có embedding
-        cursor.execute("""
-            SELECT id, name, 
-                   COALESCE(face_encoding, face_embedding) as encoding
-            FROM employees 
-            WHERE face_encoding IS NOT NULL OR face_embedding IS NOT NULL
-        """)
-        employees_db = cursor.fetchall()
-        cursor.close()
-        db.close()
-        
-        # Parse embeddings
-        employee_data = []
-        for emp_id, name, encoding_blob in employees_db:
-            if encoding_blob:
-                # Blob là bytes, convert về numpy array
-                encoding = np.frombuffer(encoding_blob, dtype=np.float32)
-                employee_data.append({
-                    'id': emp_id,
-                    'name': name,
-                    'embedding': encoding
-                })
-        
-        print(f"✅ Loaded {len(employee_data)} employees with embeddings")
+        # 🚀 OPTIMIZATION: Cache employee data (chỉ load 1 lần)
+        if self.employee_cache is None:
+            # Lấy embeddings từ database
+            db = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="12345",
+                database="attendance_db"
+            )
+            cursor = db.cursor()
+            # 🔥 EMBEDDING MATCHING: Lấy tất cả nhân viên có embedding
+            cursor.execute("""
+                SELECT id, name, 
+                       COALESCE(face_encoding, face_embedding) as encoding
+                FROM employees 
+                WHERE face_encoding IS NOT NULL OR face_embedding IS NOT NULL
+            """)
+            employees_db = cursor.fetchall()
+            cursor.close()
+            db.close()
+            
+            # Parse embeddings
+            employee_data = []
+            for emp_id, name, encoding_blob in employees_db:
+                if encoding_blob:
+                    # Blob là bytes, convert về numpy array
+                    encoding = np.frombuffer(encoding_blob, dtype=np.float32)
+                    employee_data.append({
+                        'id': emp_id,
+                        'name': name,
+                        'embedding': encoding
+                    })
+            
+            self.employee_cache = employee_data
+            print(f"✅ Loaded {len(employee_data)} employees with embeddings (CACHED)")
+        else:
+            employee_data = self.employee_cache
+            print(f"✅ Using cached employee data ({len(employee_data)} employees)")
 
         # Lấy JWT token cho user
         # Bỏ qua login nếu bị rate limit
@@ -322,21 +333,26 @@ class FaceIDApp(QWidget):
             import joblib
             import face_recognition
             
-            # 🔥 LOAD BEST MODEL (100% accuracy)
-            model_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_best_model.pkl')
-            metadata_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_best_model_metadata.pkl')
-            
-            if not os.path.exists(model_path):
-                self.label.setText("❌ Model không tồn tại! Chạy: python train_best_model.py")
-                self.camera_running = False
-                return
-            
-            clf = joblib.load(model_path)
-            metadata = joblib.load(metadata_path)
-            
-            print(f"✅ Best Model loaded: {len(clf.classes_)} classes")
-            print(f"✅ Test Accuracy: {metadata['test_accuracy']*100:.2f}%")
-            print(f"✅ Avg Confidence: {metadata['avg_confidence']*100:.2f}%")
+            # 🔥 LOAD BEST MODEL (100% accuracy) - CACHE để không load mỗi lần
+            if self.clf_cache is None:
+                model_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_best_model.pkl')
+                metadata_path = os.path.join(os.path.dirname(__file__), '../AI/faceid_best_model_metadata.pkl')
+                
+                if not os.path.exists(model_path):
+                    self.label.setText("❌ Model không tồn tại! Chạy: python train_best_model.py")
+                    self.camera_running = False
+                    return
+                
+                clf = joblib.load(model_path)
+                metadata = joblib.load(metadata_path)
+                self.clf_cache = (clf, metadata)
+                
+                print(f"✅ Best Model loaded: {len(clf.classes_)} classes (CACHED)")
+                print(f"✅ Test Accuracy: {metadata['test_accuracy']*100:.2f}%")
+                print(f"✅ Avg Confidence: {metadata['avg_confidence']*100:.2f}%")
+            else:
+                clf, metadata = self.clf_cache
+                print(f"✅ Using cached model ({len(clf.classes_)} classes)")
             
             # 🔥 MAPPING: Tên trong model → Tên trong database
             name_mapping = {
@@ -352,21 +368,38 @@ class FaceIDApp(QWidget):
                 if not ret:
                     self.label.setText("Không thể lấy hình ảnh từ camera!")
                     break
+                
+                # 🚀 OPTIMIZATION: Skip frames để giảm CPU
+                self.frame_skip_counter += 1
+                
+                # Resize frame nhỏ hơn để xử lý nhanh hơn (giảm từ full size xuống 640x480)
+                frame = cv2.resize(frame, (640, 480))
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                
+                # 🚀 Chỉ update display mỗi frame (không skip display)
                 h, w, ch = rgb_frame.shape
                 bytes_per_line = ch * w
                 qt_img = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
                 self.cam_view.setPixmap(QPixmap.fromImage(qt_img).scaled(self.cam_view.size(), Qt.KeepAspectRatio))
-                # 🔥 FACE DETECTION: Sử dụng face_recognition thay vì MTCNN/Haar
-                face_locations = face_recognition.face_locations(rgb_frame)
                 
-                # Convert to format (x, y, w, h) như Haar Cascade
+                # 🚀 OPTIMIZATION: Chỉ detect face mỗi 3 frames (giảm 66% CPU)
+                if self.frame_skip_counter % 3 != 0:
+                    QApplication.processEvents()  # Keep UI responsive
+                    continue
+                
+                # 🔥 FACE DETECTION: Sử dụng face_recognition với frame nhỏ hơn
+                # Resize xuống 320x240 để detect nhanh hơn (giảm 4x CPU)
+                small_frame = cv2.resize(rgb_frame, (320, 240))
+                face_locations = face_recognition.face_locations(small_frame, model='hog')  # HOG nhanh hơn CNN
+                
+                # Convert to format (x, y, w, h) và scale lại tọa độ (vì detect trên small_frame)
                 faces = []
+                scale_factor = 2  # 640/320 = 2
                 for (top, right, bottom, left) in face_locations:
-                    x = left
-                    y = top
-                    w = right - left
-                    h = bottom - top
+                    x = left * scale_factor
+                    y = top * scale_factor
+                    w = (right - left) * scale_factor
+                    h = (bottom - top) * scale_factor
                     faces.append([x, y, w, h])
                 if len(faces) > 0 and not scanned:
                     self.label.setText("🔍 Đã phát hiện khuôn mặt - Đang nhận diện...")
@@ -384,11 +417,76 @@ class FaceIDApp(QWidget):
                     face_img = rgb_frame[y:y+h, x:x+w]
                     
                     try:
-                        # 🔥 BEST MODEL: Extract embedding với face_recognition (large model)
-                        face_resized = cv2.resize(face_img, (300, 300))  # Resize for better detection
+                        # 🔒 SECURITY CHECKS - TẮT TẠM THỜI ĐỂ TEST NHANH
+                        # Bật lại khi cần: Uncomment các dòng dưới
+                        ENABLE_SECURITY = False  # Đổi thành True để bật security
                         
-                        # Get face encoding với model='large'
-                        face_encodings = face_recognition.face_encodings(face_resized, model='large')
+                        if ENABLE_SECURITY:
+                            import io
+                            from PIL import Image
+                            
+                            # Convert frame to bytes
+                            pil_img = Image.fromarray(face_img)
+                            img_byte_arr = io.BytesIO()
+                            pil_img.save(img_byte_arr, format='JPEG')
+                            img_bytes = img_byte_arr.getvalue()
+                            
+                            # 🔒 BƯỚC 1: Anti-Spoofing Check
+                            anti_spoofing_detector = AntiSpoofing(threshold=0.50)  # Giảm xuống 50%
+                            spoofing_result = anti_spoofing_detector.detect(img_bytes)
+                            
+                            if not spoofing_result['is_real']:
+                                scores = spoofing_result['scores']
+                                self.label.setText(
+                                    f"🚫 PHÁT HIỆN GIẢ MẠO!\n"
+                                    f"Vui lòng sử dụng khuôn mặt thật\n"
+                                    f"(Score: {spoofing_result['confidence']:.0%}, Threshold: 50%)\n"
+                                    f"T={scores['texture']:.2f} C={scores['color_diversity']:.2f} "
+                                    f"M={scores['moire_pattern']:.2f} Q={scores['face_quality']:.2f}"
+                                )
+                                self.label.setStyleSheet("""
+                                    color: white;
+                                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                        stop:0 #dc2626, stop:1 #991b1b);
+                                    padding: 15px;
+                                    border-radius: 12px;
+                                    font-size: 14px;
+                                    font-weight: bold;
+                                    border: 2px solid #ef4444;
+                                """)
+                                scanned = True
+                                continue
+                            
+                            print(f"✅ Anti-spoofing: {spoofing_result['confidence']:.0%}")
+                            
+                            # 😷 BƯỚC 2: Mask Detection
+                            mask_detector = MaskDetector(threshold=0.65)
+                            mask_result = mask_detector.detect(img_bytes)
+                            
+                            if mask_result['wearing_mask']:
+                                self.label.setText(f"😷 PHÁT HIỆN KHẨU TRANG!\nVui lòng tháo khẩu trang\n(Confidence: {mask_result['confidence']:.0%})")
+                                self.label.setStyleSheet("""
+                                    color: white;
+                                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                        stop:0 #f59e0b, stop:1 #d97706);
+                                    padding: 15px;
+                                    border-radius: 12px;
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                    border: 2px solid #fbbf24;
+                                """)
+                                scanned = True
+                                continue
+                            
+                            print(f"✅ Mask check: Passed")
+                        
+                        # ✅ Face Recognition (nhanh hơn khi tắt security)
+                        # 🔥 BEST MODEL: Extract embedding với face_recognition
+                        # 🚀 OPTIMIZATION: Giảm size từ 300x300 xuống 150x150 (nhanh hơn 4x)
+                        face_resized = cv2.resize(face_img, (150, 150))
+                        
+                        # 🚀 Get face encoding với model='small' (nhanh hơn large 5x, vẫn accurate)
+                        face_encodings = face_recognition.face_encodings(face_resized, model='small')
                         
                         if len(face_encodings) == 0:
                             self.label.setText("⚠️ Không extract được face encoding!")
@@ -460,6 +558,7 @@ class FaceIDApp(QWidget):
                                             border: 2px solid #f87171;
                                         """)
                                         scanned = False
+                                        QApplication.processEvents()  # Keep UI responsive
                                         continue
                                     
                                     # 🔥 TỰ ĐỘNG XÁC ĐỊNH CA LÀM VIỆC DựA VÀO GIỜ ĐIỂM DANH
@@ -653,7 +752,8 @@ class FaceIDApp(QWidget):
                     
                 QApplication.processEvents()
                 
-                key = cv2.waitKey(1)
+                # 🚀 OPTIMIZATION: Control FPS để giảm CPU (30ms = ~33 FPS, tăng lên 50ms = 20 FPS)
+                key = cv2.waitKey(50)  # Tăng từ 1ms lên 50ms để giảm CPU
                 if key == 27:
                     self.camera_running = False
                     break

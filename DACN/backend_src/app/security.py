@@ -113,7 +113,8 @@ def decrypt_data(encrypted_data: str) -> str:
         decrypted = _cipher_suite.decrypt(encrypted_data.encode())
         return decrypted.decode()
     except Exception as e:
-        logger.error(f"Decryption failed: {e}")
+        # Only log warning for invalid format (not error, since it might be plain text)
+        logger.warning(f"Decryption skipped (data may be plain text): {str(e)[:50]}")
         raise HTTPException(status_code=500, detail="Data decryption failed")
 
 
