@@ -1,24 +1,27 @@
-// Modern Color Palette
+// Professional Color Palette - Modern & Clean
 export const colors = {
-  // Primary Colors
+  // Primary Colors - Blue Purple Gradient
   primary: {
-    main: '#667eea',
-    dark: '#5568d3',
-    light: '#8c9eff',
+    main: '#6366f1',      // Indigo
+    dark: '#4f46e5',      
+    light: '#818cf8',
+    gradient: ['#6366f1', '#8b5cf6'],
   },
   
-  // Secondary Colors
+  // Secondary Colors - Purple
   secondary: {
-    main: '#764ba2',
-    dark: '#5e3c82',
-    light: '#9c6ec5',
+    main: '#8b5cf6',      // Purple
+    dark: '#7c3aed',
+    light: '#a78bfa',
+    gradient: ['#8b5cf6', '#ec4899'],
   },
   
-  // Accent Colors
+  // Accent Colors - Pink
   accent: {
-    main: '#f093fb',
-    dark: '#d877e3',
-    light: '#fdb3ff',
+    main: '#ec4899',      // Pink
+    dark: '#db2777',
+    light: '#f472b6',
+    gradient: ['#ec4899', '#f43f5e'],
   },
   
   // Status Colors

@@ -38,6 +38,7 @@ class LoginResponse(BaseModel):
     employee_id: Optional[int] = None  # 🔥 ADDED for mobile app
     department: Optional[str] = None
     phone: Optional[str] = None
+    email: Optional[str] = None  # 🔥 ADDED email field
     avatar: Optional[str] = None
     access_token: str
     refresh_token: str
@@ -144,6 +145,7 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
         full_name = employee.name if employee and getattr(employee, "name", None) else user.username
         department = employee.department if employee and getattr(employee, "department", None) else "(Chưa cập nhật)"
         phone = employee.phone if employee and getattr(employee, "phone", None) else user.username
+        email = employee.email if employee and getattr(employee, "email", None) else None
         avatar = None
         if employee and getattr(employee, "photo_path", None):
             photo_path = employee.photo_path.strip()
@@ -163,6 +165,7 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
             employee_id=user.employee_id,  # 🔥 ADDED for mobile app
             department=department,
             phone=phone,
+            email=email,  # 🔥 ADDED email field
             avatar=avatar,
             access_token=access_token,
             refresh_token=refresh_token,
@@ -398,6 +401,7 @@ def get_me(
             if employee:
                 department = employee.department
                 phone = employee.phone
+                email = employee.email
                 
                 # Construct avatar URL
                 if employee.photo_path:
@@ -420,6 +424,7 @@ def get_me(
             employee_id=user.employee_id,
             department=department,
             phone=phone,
+            email=email,
             avatar=avatar,
             access_token=access_token,
             refresh_token=refresh_token,
