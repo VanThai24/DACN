@@ -25,34 +25,39 @@
 
 ### Bật/Tắt Security Checks
 
-Mở file `main.py` và tìm dòng (~388):
+Mở file `main.py` và tìm dòng (~422):
 
 ```python
-ENABLE_SECURITY = False  # Đổi thành True để bật security
+ENABLE_SECURITY = True  # Đổi thành False để tắt security
 ```
 
-**Tắt security (Nhanh hơn, dễ test):**
+**❌ Tắt security (Nhanh hơn, KHÔNG AN TOÀN):**
 ```python
 ENABLE_SECURITY = False
 ```
+⚠️ **Cảnh báo:** Dùng ảnh in sẽ điểm danh được!
 
-**Bật security (An toàn hơn):**
+**✅ Bật security (KHUYẾN NGHỊ cho production):**
 ```python
 ENABLE_SECURITY = True
 ```
+🔒 **An toàn:** Chặn ảnh in, video, màn hình
 
 ### Điều chỉnh Thresholds
 
 #### Anti-Spoofing (Chống giả mạo)
 ```python
-anti_spoofing_detector = AntiSpoofing(threshold=0.50)
+anti_spoofing_detector = AntiSpoofing(threshold=0.45)
 ```
 
-| Threshold | Khi nào dùng |
-|-----------|--------------|
-| 0.40-0.50 | Test/Development (dễ pass) |
-| 0.50-0.60 | Production (cân bằng) |
-| 0.60-0.70 | Bảo mật cao (khó pass) |
+| Threshold | Khi nào dùng | Ghi chú |
+|-----------|--------------|---------|
+| 0.35-0.40 | Test/Development | Dễ pass, ảnh in có thể qua |
+| **0.45-0.50** | **Production (KHUYẾN NGHỊ)** | **Cân bằng tốt** |
+| 0.50-0.60 | Bảo mật cao | Mặt thật có thể bị chặn |
+| 0.60-0.70 | Rất nghiêm ngặt | Không khuyến nghị |
+
+**Hiện tại:** 0.45 (cân bằng - chặn ảnh in nhưng cho mặt thật qua)
 
 #### Mask Detection (Phát hiện khẩu trang)
 ```python
@@ -67,22 +72,22 @@ mask_detector = MaskDetector(threshold=0.65)
 
 ## 🚀 Recommended Settings
 
-### Development/Testing
+### Development/Testing (Không an toàn)
 ```python
-ENABLE_SECURITY = False  # Tắt để test nhanh
+ENABLE_SECURITY = False  # ⚠️ Tắt để test nhanh (ảnh in sẽ qua được!)
 ```
 
-### Production (Văn phòng)
+### Production (Văn phòng) - ✅ KHUYẾN NGHỊ
 ```python
 ENABLE_SECURITY = True
-anti_spoofing_detector = AntiSpoofing(threshold=0.50)
+anti_spoofing_detector = AntiSpoofing(threshold=0.45)  # Cân bằng
 mask_detector = MaskDetector(threshold=0.65)
 ```
 
 ### Production (Bảo mật cao)
 ```python
 ENABLE_SECURITY = True
-anti_spoofing_detector = AntiSpoofing(threshold=0.65)
+anti_spoofing_detector = AntiSpoofing(threshold=0.55)  # Nghiêm ngặt hơn
 mask_detector = MaskDetector(threshold=0.70)
 ```
 

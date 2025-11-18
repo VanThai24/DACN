@@ -417,9 +417,9 @@ class FaceIDApp(QWidget):
                     face_img = rgb_frame[y:y+h, x:x+w]
                     
                     try:
-                        # 🔒 SECURITY CHECKS - TẮT TẠM THỜI ĐỂ TEST NHANH
-                        # Bật lại khi cần: Uncomment các dòng dưới
-                        ENABLE_SECURITY = False  # Đổi thành True để bật security
+                        # 🔒 SECURITY CHECKS - BẬT ĐỂ CHẶN ẢNH IN
+                        # Tắt khi cần test nhanh: Đổi thành False
+                        ENABLE_SECURITY = True  # BẬT security để chặn giả mạo
                         
                         if ENABLE_SECURITY:
                             import io
@@ -432,7 +432,8 @@ class FaceIDApp(QWidget):
                             img_bytes = img_byte_arr.getvalue()
                             
                             # 🔒 BƯỚC 1: Anti-Spoofing Check
-                            anti_spoofing_detector = AntiSpoofing(threshold=0.50)  # Giảm xuống 50%
+                            # Threshold 0.45 = cân bằng: chặn ảnh in nhưng cho mặt thật qua
+                            anti_spoofing_detector = AntiSpoofing(threshold=0.45)
                             spoofing_result = anti_spoofing_detector.detect(img_bytes)
                             
                             if not spoofing_result['is_real']:
@@ -440,9 +441,9 @@ class FaceIDApp(QWidget):
                                 self.label.setText(
                                     f"🚫 PHÁT HIỆN GIẢ MẠO!\n"
                                     f"Vui lòng sử dụng khuôn mặt thật\n"
-                                    f"(Score: {spoofing_result['confidence']:.0%}, Threshold: 50%)\n"
-                                    f"T={scores['texture']:.2f} C={scores['color_diversity']:.2f} "
-                                    f"M={scores['moire_pattern']:.2f} Q={scores['face_quality']:.2f}"
+                                    f"(Score: {spoofing_result['confidence']:.0%}, Threshold: 45%)\n"
+                                    f"Texture={scores['texture']:.2f} Color={scores['color_diversity']:.2f}\n"
+                                    f"Moire={scores['moire_pattern']:.2f} Quality={scores['face_quality']:.2f}"
                                 )
                                 self.label.setStyleSheet("""
                                     color: white;

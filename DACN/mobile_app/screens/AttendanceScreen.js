@@ -272,7 +272,7 @@ export default function AttendanceScreen({ user }) {
             }
             renderItem={({ item }) => {
               // Xử lý hiển thị cho các trạng thái khác nhau
-              let statusBadgeStyle, statusText, statusIcon;
+              let statusBadgeStyle, statusText, statusIcon, isLate = false;
               
               if (item.isAbsent) {
                 statusBadgeStyle = styles.absentBadge;
@@ -282,14 +282,35 @@ export default function AttendanceScreen({ user }) {
                 statusBadgeStyle = styles.futureBadge;
                 statusText = "○ Chưa đến";
                 statusIcon = "schedule";
-              } else if (item.status === "present") {
-                statusBadgeStyle = styles.presentBadge;
-                statusText = "✓ Có mặt";
-                statusIcon = "check-circle";
               } else {
-                statusBadgeStyle = styles.lateBadge;
-                statusText = "⚠ Trễ";
-                statusIcon = "warning";
+                // Tính toán trễ/đúng giờ dựa vào start_time và timestamp_in
+                if (item.start_time && item.timestamp_in) {
+                  const [startHour, startMin] = item.start_time.split(':').map(Number);
+                  const checkinTime = new Date(item.timestamp_in);
+                  const checkinHour = checkinTime.getHours();
+                  const checkinMin = checkinTime.getMinutes();
+                  
+                  // So sánh: Trễ nếu checkin sau start_time + 5 phút
+                  const startTotalMin = startHour * 60 + startMin;
+                  const checkinTotalMin = checkinHour * 60 + checkinMin;
+                  const lateMins = checkinTotalMin - startTotalMin;
+                  
+                  if (lateMins > 5) {
+                    isLate = true;
+                    statusBadgeStyle = styles.lateBadge;
+                    statusText = `⚠ Trễ ${lateMins} phút`;
+                    statusIcon = "warning";
+                  } else {
+                    statusBadgeStyle = styles.presentBadge;
+                    statusText = "✓ Đúng giờ";
+                    statusIcon = "check-circle";
+                  }
+                } else {
+                  // Fallback nếu không có start_time
+                  statusBadgeStyle = styles.presentBadge;
+                  statusText = "✓ Có mặt";
+                  statusIcon = "check-circle";
+                }
               }
               
               return (
@@ -333,14 +354,21 @@ export default function AttendanceScreen({ user }) {
                       <View style={styles.timeRow}>
                         <View style={styles.timeItem}>
                           <MaterialIcons name="login" size={24} color="#43a047" />
-                          <Text style={styles.timeLabel}>Giờ vào</Text>
-                          <Text style={styles.timeValue}>{item.start_time || formatDateTime(item.timestamp_in).split(' ')[1]}</Text>
+                          <Text style={styles.timeLabel}>Ca làm</Text>
+                          <Text style={styles.timeValue}>
+                            {item.start_time && item.end_time 
+                              ? `${item.start_time} - ${item.end_time}`
+                              : formatDateTime(item.timestamp_in).split(' ')[1]
+                            }
+                          </Text>
                         </View>
                         <View style={styles.timeDivider} />
                         <View style={styles.timeItem}>
-                          <MaterialIcons name="logout" size={24} color="#e53935" />
-                          <Text style={styles.timeLabel}>Giờ ra</Text>
-                          <Text style={styles.timeValue}>{item.end_time || "-"}</Text>
+                          <MaterialIcons name="schedule" size={24} color="#2979ff" />
+                          <Text style={styles.timeLabel}>Điểm danh</Text>
+                          <Text style={styles.timeValue}>
+                            {item.timestamp_in ? formatDateTime(item.timestamp_in).split(' ')[1] : "-"}
+                          </Text>
                         </View>
                       </View>
                     )}
@@ -382,37 +410,57 @@ export default function AttendanceScreen({ user }) {
                       </View>
                     </View>
                     <View style={styles.detailRow}>
-                      <MaterialIcons name="login" size={24} color="#43a047" />
+                      <MaterialIcons name="access-time" size={24} color="#43a047" />
                       <View style={styles.detailText}>
-                        <Text style={styles.detailLabel}>Giờ vào ca</Text>
+                        <Text style={styles.detailLabel}>Ca làm việc</Text>
                         <Text style={styles.detailValue}>
-                          {selectedRecord.timestamp_in ? formatDateTime(selectedRecord.timestamp_in).split(' ')[1] : "-"}
+                          {selectedRecord.start_time && selectedRecord.end_time 
+                            ? `${selectedRecord.start_time} - ${selectedRecord.end_time}`
+                            : "Chưa có thông tin ca"
+                          }
                         </Text>
                       </View>
                     </View>
                     <View style={styles.detailRow}>
-                      <MaterialIcons name="logout" size={24} color="#e53935" />
-                      <View style={styles.detailText}>
-                        <Text style={styles.detailLabel}>Giờ ra ca</Text>
-                        <Text style={styles.detailValue}>{selectedRecord.end_time || "-"}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.detailRow}>
-                      <MaterialIcons name="alarm" size={24} color="#43a047" />
+                      <MaterialIcons name="login" size={24} color="#2979ff" />
                       <View style={styles.detailText}>
                         <Text style={styles.detailLabel}>Thời gian điểm danh</Text>
-                        <Text style={styles.detailValue}>{formatDateTime(selectedRecord.timestamp_in)}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.detailRow}>
-                      <MaterialIcons name="info" size={24} color="#2979ff" />
-                      <View style={styles.detailText}>
-                        <Text style={styles.detailLabel}>Trạng thái</Text>
-                        <Text style={[styles.detailValue, selectedRecord.status === "in" ? styles.in : styles.out]}>
-                          {selectedRecord.status}
+                        <Text style={styles.detailValue}>
+                          {selectedRecord.timestamp_in ? formatDateTime(selectedRecord.timestamp_in) : "-"}
                         </Text>
                       </View>
                     </View>
+                    {selectedRecord.start_time && selectedRecord.timestamp_in && (() => {
+                      const [startHour, startMin] = selectedRecord.start_time.split(':').map(Number);
+                      const checkinTime = new Date(selectedRecord.timestamp_in);
+                      const checkinHour = checkinTime.getHours();
+                      const checkinMin = checkinTime.getMinutes();
+                      const startTotalMin = startHour * 60 + startMin;
+                      const checkinTotalMin = checkinHour * 60 + checkinMin;
+                      const lateMins = checkinTotalMin - startTotalMin;
+                      
+                      return lateMins > 5 ? (
+                        <View style={styles.detailRow}>
+                          <MaterialIcons name="warning" size={24} color="#f57c00" />
+                          <View style={styles.detailText}>
+                            <Text style={styles.detailLabel}>Trạng thái</Text>
+                            <Text style={[styles.detailValue, {color: '#f57c00', fontWeight: '600'}]}>
+                              Trễ {lateMins} phút
+                            </Text>
+                          </View>
+                        </View>
+                      ) : (
+                        <View style={styles.detailRow}>
+                          <MaterialIcons name="check-circle" size={24} color="#43a047" />
+                          <View style={styles.detailText}>
+                            <Text style={styles.detailLabel}>Trạng thái</Text>
+                            <Text style={[styles.detailValue, {color: '#43a047', fontWeight: '600'}]}>
+                              Đúng giờ
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })()}
                     <View style={styles.detailRow}>
                       <MaterialIcons name="devices" size={24} color="#ffa726" />
                       <View style={styles.detailText}>

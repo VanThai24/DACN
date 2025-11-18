@@ -153,16 +153,16 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-3">
-                    <a href="/Employees/Create" class="btn btn-lg btn-success">
+                    <a href="@Url.Action("Create", "Employees")" class="btn btn-lg btn-success">
                         <i class="bi bi-person-plus-fill"></i> Thêm nhân viên mới
                     </a>
-                    <a href="/Admin/Reports" class="btn btn-lg btn-primary">
+                    <a href="@Url.Action("Reports", "Admin")" class="btn btn-lg btn-primary">
                         <i class="bi bi-file-earmark-text"></i> Tạo báo cáo
                     </a>
-                    <a href="/Devices" class="btn btn-lg btn-info">
+                    <a href="@Url.Action("Create", "Devices")" class="btn btn-lg btn-info">
                         <i class="bi bi-plus-circle"></i> Thêm thiết bị
                     </a>
-                    <a href="/Attendance" class="btn btn-lg btn-warning">
+                    <a href="@Url.Action("Index", "Attendance")" class="btn btn-lg btn-warning">
                         <i class="bi bi-calendar-check"></i> Xem điểm danh
                     </a>
                 </div>
