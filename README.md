@@ -114,19 +114,19 @@ python update_embeddings_best_model.py
 
 ## 📚 Tài Liệu Chi Tiết
 
-### 📖 Hướng Dẫn
-- [`DACN/AI/HOW_TO_ADD_EMPLOYEE.md`](DACN/AI/HOW_TO_ADD_EMPLOYEE.md) - Thêm nhân viên
-- [`DACN/AI/FOR_THESIS_ONLY.md`](DACN/AI/FOR_THESIS_ONLY.md) - Workflow cho đồ án
-- [`DACN/AI/DATA_COLLECTION_GUIDE.md`](DACN/AI/DATA_COLLECTION_GUIDE.md) - Thu thập dữ liệu
-- [`QUICK_START_GUIDE.md`](QUICK_START_GUIDE.md) - Hướng dẫn chi tiết
-- [`PROJECT_COMPLETION_REPORT.md`](PROJECT_COMPLETION_REPORT.md) - Báo cáo hoàn thành
 
-### 📱 Mobile App
-- [`DACN/mobile_app/README.md`](DACN/mobile_app/README.md)
-- [`DACN/mobile_app/ANDROID_SETUP_GUIDE.md`](DACN/mobile_app/ANDROID_SETUP_GUIDE.md)
+### 📖 Hướng Dẫn Sử Dụng Báo Cáo
+- Vào Web Admin, chọn chức năng xuất báo cáo điểm danh hoặc nhân viên.
+- File báo cáo sẽ có tiêu đề lớn nổi bật, bảng dữ liệu rõ ràng.
+- Khi mở file CSV bằng Excel:
+  - Kéo rộng cột ngày giờ để hiển thị đầy đủ.
+  - Số điện thoại sẽ hiển thị đúng định dạng, không bị chuyển sang số khoa học.
+  - Có thể merge, bôi đậm, tăng cỡ chữ tiêu đề lớn để nổi bật hơn.
 
-### 🖥️ Desktop App
-- [`DACN/faceid_desktop/README.md`](DACN/faceid_desktop/README.md)
+### 📑 Tính Năng Báo Cáo Mới
+- Xuất báo cáo điểm danh/thông tin nhân viên với tiêu đề lớn, bảng dữ liệu chuẩn.
+- Cột ngày giờ tách riêng, dễ đọc.
+- Số điện thoại hiển thị đúng, không bị lỗi định dạng.
 
 ---
 
@@ -189,7 +189,9 @@ Database: attendance_db
   └── App.js                           # Mobile app
 
 📂 DACN/
-  └── Program.cs                       # Web admin
+  ├── Program.cs                       # Web admin
+  ├── Controllers/AdminController.cs    # Chức năng xuất báo cáo
+  └── wwwroot/reports/                  # Thư mục lưu file báo cáo
 ```
 
 ### 🎯 Mục Tiêu Đồ Án
