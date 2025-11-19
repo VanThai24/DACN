@@ -116,34 +116,92 @@ namespace Controllers
 
             // Tạo nội dung báo cáo
             var reportData = new System.Text.StringBuilder();
-            reportData.AppendLine("ID,Name,Date,Status");
-
+            
+            // Thêm BOM cho UTF-8 để Excel nhận diện đúng encoding
+            reportData.Append('\ufeff');
+            
             if (type == "Attendance")
             {
+                reportData.AppendLine("==========================================================");
+                reportData.AppendLine("           BÁO CÁO ĐIỂM DANH NHÂN VIÊN");
+                reportData.AppendLine($"           Từ ngày: {(startDate?.ToString("dd/MM/yyyy") ?? "Tất cả")} - Đến ngày: {(endDate?.ToString("dd/MM/yyyy") ?? "Tất cả")}");
+                reportData.AppendLine($"           Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
+                reportData.AppendLine("==========================================================");
+                reportData.AppendLine("");
+                reportData.AppendLine("ID,Tên nhân viên,Ngày,Giờ,Trạng thái");
+                
                 var records = _context.AttendanceRecords
                     .Join(_context.Employees, r => r.EmployeeId, e => e.Id, (r, e) => new { r, e })
                     .Where(x => !startDate.HasValue || x.r.TimestampIn >= startDate)
                     .Where(x => !endDate.HasValue || x.r.TimestampIn <= endDate)
+                    .OrderBy(x => x.r.TimestampIn)
                     .ToList();
 
                 foreach (var item in records)
                 {
-                    reportData.AppendLine($"{item.r.Id},{item.e.Name},{item.r.TimestampIn:yyyy-MM-dd HH:mm},{item.r.Status}");
+                    string name = item.e.Name?.Replace("\"", "\"\"") ?? "";
+                    string status = item.r.Status?.Replace("\"", "\"\"") ?? "present";
+                    // Thêm dấu nháy đơn trước ngày để Excel hiểu là text
+                    string dateOnly = item.r.TimestampIn.HasValue ? "'" + item.r.TimestampIn.Value.ToString("dd/MM/yyyy") : "";
+                    string timeOnly = item.r.TimestampIn.HasValue ? "'" + item.r.TimestampIn.Value.ToString("HH:mm:ss") : "";
+                    
+                    reportData.AppendLine($"{item.r.Id},\"{name}\",{dateOnly},{timeOnly},\"{status}\"");
                 }
+                
+                // Thêm footer
+                reportData.AppendLine("");
+                reportData.AppendLine("==========================================================");
+                reportData.AppendLine($"           Tổng số bản ghi: {records.Count}");
+                reportData.AppendLine("==========================================================");
             }
             else if (type == "Employee")
             {
-                var employees = _context.Employees.ToList();
-                reportData.Clear();
-                reportData.AppendLine("ID,Name,Department,Role,Phone,Email");
+                reportData.AppendLine("==========================================================");
+                reportData.AppendLine("           DANH SÁCH NHÂN VIÊN CÔNG TY");
+                reportData.AppendLine($"           Tổng số nhân viên: {_context.Employees.Count()} người");
+                reportData.AppendLine($"           Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
+                reportData.AppendLine("==========================================================");
+                reportData.AppendLine("");
+                reportData.AppendLine("ID,Tên nhân viên,Phòng ban,Chức vụ,Số điện thoại,Email");
+                
+                var employees = _context.Employees
+                    .OrderBy(e => e.Department)
+                    .ThenBy(e => e.Name)
+                    .ToList();
+                
                 foreach (var emp in employees)
                 {
-                    reportData.AppendLine($"{emp.Id},{emp.Name},{emp.Department},{emp.Role},{emp.Phone},{emp.Email}");
+                    string name = emp.Name?.Replace("\"", "\"\"") ?? "";
+                    string department = emp.Department?.Replace("\"", "\"\"") ?? "";
+                    string role = emp.Role?.Replace("\"", "\"\"") ?? "";
+                    // Thêm tab character (\t) trước số điện thoại để Excel hiểu là text
+                    string phone = !string.IsNullOrEmpty(emp.Phone) ? $"\t{emp.Phone.Replace("\"", "\"\"")}" : "";
+                    string email = emp.Email?.Replace("\"", "\"\"") ?? "";
+                    
+                    reportData.AppendLine($"{emp.Id},\"{name}\",\"{department}\",\"{role}\",\"{phone}\",\"{email}\"");
                 }
+                
+                // Thêm footer với thống kê theo phòng ban
+                reportData.AppendLine("");
+                reportData.AppendLine("==========================================================");
+                reportData.AppendLine("           THỐNG KÊ THEO PHÒNG BAN");
+                reportData.AppendLine("==========================================================");
+                
+                var deptStats = _context.Employees
+                    .GroupBy(e => e.Department)
+                    .Select(g => new { Dept = g.Key ?? "Chưa phân công", Count = g.Count() })
+                    .OrderByDescending(x => x.Count)
+                    .ToList();
+                
+                foreach (var stat in deptStats)
+                {
+                    reportData.AppendLine($"           {stat.Dept}: {stat.Count} người");
+                }
+                reportData.AppendLine("==========================================================");
             }
 
-            // Lưu file
-            System.IO.File.WriteAllText(filePath, reportData.ToString());
+            // Lưu file với encoding UTF-8 có BOM
+            System.IO.File.WriteAllText(filePath, reportData.ToString(), new System.Text.UTF8Encoding(true));
 
             // Lưu thông tin báo cáo vào database
             var report = new Models.Report
@@ -172,7 +230,7 @@ namespace Controllers
 
             var fileBytes = System.IO.File.ReadAllBytes(filePath);
             var fileName = Path.GetFileName(filePath);
-            return File(fileBytes, "text/csv", fileName);
+            return File(fileBytes, "text/csv; charset=utf-8", fileName);
         }
 
         // POST: Admin/DeleteReport/5

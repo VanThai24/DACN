@@ -242,3 +242,5 @@ D:\DACN\DACN\obj\Debug\net9.0\refint\AdminWeb.dll
 D:\DACN\DACN\obj\Debug\net9.0\AdminWeb.pdb
 D:\DACN\DACN\obj\Debug\net9.0\AdminWeb.genruntimeconfig.cache
 D:\DACN\DACN\obj\Debug\net9.0\ref\AdminWeb.dll
+D:\DACN\DACN\obj\Debug\net9.0\compressed\m0tvop1nt5-d35hrkt97z.gz
+D:\DACN\DACN\obj\Debug\net9.0\compressed\n3w4lp2dpn-t8jofxvipx.gz
