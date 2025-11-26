@@ -1,9 +1,99 @@
-@model IEnumerable<Models.AttendanceRecordViewModel>
+@model X.PagedList.IPagedList<Models.AttendanceRecordViewModel>
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 @{
     ViewBag.Title = "Danh sách điểm danh";
+    var statsApiUrl = Url.Action("AttendanceStats", "Attendance");
 }
+
+<!-- Biểu đồ thống kê điểm danh -->
 <div class="row justify-content-center mt-4">
-    <div class="col-md-10">
+    <div class="col-md-12">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-bar-chart"></i> Thống kê điểm danh</h4>
+            </div>
+            <div class="card-body">
+                <div style="min-height:220px;display:flex;align-items:center;justify-content:center;">
+                        <div style="display: flex; justify-content: center; align-items: center; height: 260px; margin-top: 0;">
+                            <canvas id="attendanceChart" width="220" height="220" style="margin: 0 auto;"></canvas>
+                        </div>
+                </div>
+                <div id="attendanceChartEmpty" class="text-center text-muted" style="display:none;">Không có dữ liệu để hiển thị biểu đồ.</div>
+                <div id="attendanceSummary" style="margin-top:12px;display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function loadAttendanceStats() {
+        const date = document.querySelector('input[name="date"]').value;
+        const url = '@statsApiUrl' + (date ? `?date=${date}` : '');
+        try {
+            const res = await fetch(url, { credentials: 'same-origin' });
+            let data;
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.indexOf('application/json') !== -1) {
+                data = await res.json();
+            } else {
+                return;
+            }
+            // Chỉ lấy trạng thái Có mặt và Đi muộn
+            let present = 0, late = 0;
+            data.forEach(x => {
+                const s = (x.status ?? x.Status ?? 'unknown');
+                if (s === "present") present = Number(x.count ?? x.Count ?? 0);
+                if (s === "late") late = Number(x.count ?? x.Count ?? 0);
+            });
+            const labels = ["Có mặt", "Đi muộn"];
+            const counts = [present, late];
+            const colors = ["#28a745", "#ffc107"];
+            document.getElementById('attendanceChartEmpty').style.display = (present + late === 0 ? 'block' : 'none');
+            document.getElementById('attendanceChart').style.display = (present + late > 0 ? 'block' : 'none');
+            document.getElementById('attendanceSummary').style.display = 'block';
+            // Render summary badges
+            const summary = document.getElementById('attendanceSummary');
+            summary.innerHTML = labels.map((l,i) => counts[i] > 0 ? `<span style="display:inline-block;margin-right:8px;padding:6px 10px;border-radius:14px;background:${colors[i]};color:#fff;font-weight:700;">${l}: ${counts[i]}</span>` : '').join('');
+            // Vẽ pie chart
+            if (present + late > 0) {
+                const ctx = document.getElementById('attendanceChart').getContext('2d');
+                if(window.attendanceChart && typeof window.attendanceChart.destroy === 'function') {
+                    window.attendanceChart.destroy();
+                }
+                window.attendanceChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: colors,
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { display: true },
+                            title: { display: false }
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            document.getElementById('attendanceChart').style.display = 'none';
+            document.getElementById('attendanceChartEmpty').style.display = 'block';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAttendanceStats();
+        document.querySelector('form').addEventListener('submit', function(e) {
+            setTimeout(loadAttendanceStats, 500);
+        });
+    });
+</script>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-12">
         <div class="card shadow">
             <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
                 <h2 class="mb-0">Danh sách điểm danh</h2>
@@ -12,7 +102,26 @@
                 </a>
             </div>
             <div class="card-body">
-                <table class="table table-bordered table-hover">
+                <form method="get" class="mb-3 row g-2">
+                    <div class="col-md-3">
+                        <input type="text" name="employee" class="form-control" placeholder="Tìm nhân viên" value="@Context.Request.Query["employee"]" />
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="date" class="form-control" value="@Context.Request.Query["date"]" />
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="present" selected="@(Context.Request.Query["status"]=="present" ? "selected" : null)">Có mặt</option>
+                            <option value="absent" selected="@(Context.Request.Query["status"]=="absent" ? "selected" : null)">Vắng</option>
+                            <option value="late" selected="@(Context.Request.Query["status"]=="late" ? "selected" : null)">Đi muộn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Lọc</button>
+                    </div>
+                </form>
+                <table class="table table-bordered table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -31,8 +140,24 @@
                                 <td>@r.Id</td>
                                 <td>@r.EmployeeName</td>
                                 <td>@(r.TimestampIn?.ToString("dd/MM/yyyy HH:mm"))</td>
-                                <td>@r.Status</td>
-                                <td>@r.PhotoPath</td>
+                                <td>
+                                    @if (r.Status == "present") {
+                                        <span class="badge bg-success">Có mặt</span>
+                                    } else if (r.Status == "absent") {
+                                        <span class="badge bg-danger">Vắng</span>
+                                    } else if (r.Status == "late") {
+                                        <span class="badge bg-warning">Đi muộn</span>
+                                    } else {
+                                        <span class="badge bg-secondary">@r.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(r.PhotoPath)) {
+                                        <img src="@r.PhotoPath" alt="ảnh" style="width:40px;height:40px;object-fit:cover;border-radius:5px;" />
+                                    } else {
+                                        <span class="text-muted">Không có</span>
+                                    }
+                                </td>
                                 <td>@r.DeviceId</td>
                                 <td>
                                     <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-info">
@@ -49,6 +174,9 @@
                         }
                     </tbody>
                 </table>
+                <div class="d-flex justify-content-center mt-3">
+                    @Html.PagedListPager(Model, page => Url.Action("Index", new { page, employee = Context.Request.Query["employee"], date = Context.Request.Query["date"], status = Context.Request.Query["status"] }), new PagedListRenderOptions { UlElementClasses = new[] { "pagination" }, LiElementClasses = new[] { "page-item" } })
+                </div>
             </div>
         </div>
     </div>

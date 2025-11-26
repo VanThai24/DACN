@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Data;
 using Models;
 using System.Linq;
+using X.PagedList;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Controllers
 {
@@ -13,8 +15,25 @@ namespace Controllers
             _context = context;
         }
 
-        public IActionResult Index()
-        {            var records = _context.AttendanceRecords
+        [HttpGet]
+        [AllowAnonymous] // Cho phép truy cập API từ client
+        public IActionResult AttendanceStats(string date)
+        {
+            var query = _context.AttendanceRecords.AsQueryable();
+            if (!string.IsNullOrEmpty(date) && DateTime.TryParse(date, out var d))
+                query = query.Where(x => x.TimestampIn.HasValue && x.TimestampIn.Value.Date == d.Date);
+
+            var stats = query
+                .Where(x => !string.IsNullOrEmpty(x.Status))
+                .GroupBy(x => x.Status ?? "unknown")
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToList();
+            return Json(stats);
+        }
+
+        public IActionResult Index(string employee, string status, string date, int? page)
+        {
+            var query = _context.AttendanceRecords
                 .Join(_context.Employees,
                       r => r.EmployeeId,
                       e => e.Id,
@@ -22,13 +41,22 @@ namespace Controllers
                           Id = r.Id,
                           EmployeeName = e.Name,
                           TimestampIn = r.TimestampIn,
-                          // TimestampOut = r.TimestampOut, // Đã xóa cột timestamp_out khỏi database
                           Status = r.Status,
                           PhotoPath = r.PhotoPath,
                           DeviceId = r.DeviceId
-                      })
-                .ToList();
-            return View(records);
+                      });
+
+            if (!string.IsNullOrEmpty(employee))
+                query = query.Where(x => x.EmployeeName.Contains(employee));
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(x => x.Status == status);
+            if (!string.IsNullOrEmpty(date) && DateTime.TryParse(date, out var d))
+                query = query.Where(x => x.TimestampIn.HasValue && x.TimestampIn.Value.Date == d.Date);
+
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+            var paged = query.OrderByDescending(x => x.TimestampIn).ToList().ToPagedList(pageNumber, pageSize);
+            return View(paged);
         }
 
             // GET: Attendance/Details/5

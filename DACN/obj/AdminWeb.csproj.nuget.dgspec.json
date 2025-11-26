@@ -69,6 +69,14 @@
             "Twilio": {
               "target": "Package",
               "version": "[7.13.5, )"
+            },
+            "X.PagedList": {
+              "target": "Package",
+              "version": "[7.5.0, )"
+            },
+            "X.PagedList.Mvc.Core": {
+              "target": "Package",
+              "version": "[7.5.0, )"
             }
           },
           "imports": [
