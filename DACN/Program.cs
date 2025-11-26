@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -6,7 +7,7 @@ using System;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSession();
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "keys")));
+    .PersistKeysToDbContext<Data.AppDbContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
