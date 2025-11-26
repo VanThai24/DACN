@@ -6,7 +6,7 @@ using System;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSession();
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"/app/keys"));
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "keys")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
