@@ -9,6 +9,7 @@
       "AdminWeb/1.0.0": {
         "dependencies": {
           "BCrypt.Net-Next": "4.0.3",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "9.0.0",
           "Newtonsoft.Json": "13.0.3",
           "Pomelo.EntityFrameworkCore.MySql": "9.0.0",
           "Twilio": "7.13.5"
@@ -22,6 +23,31 @@
           "lib/net6.0/BCrypt.Net-Next.dll": {
             "assemblyVersion": "4.0.3.0",
             "fileVersion": "4.0.3.0"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Cryptography.Internal/9.0.0": {},
+      "Microsoft.AspNetCore.DataProtection/9.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.Internal": "9.0.0",
+          "Microsoft.AspNetCore.DataProtection.Abstractions": "9.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Hosting.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Options": "9.0.0",
+          "System.Security.Cryptography.Xml": "9.0.0"
+        }
+      },
+      "Microsoft.AspNetCore.DataProtection.Abstractions/9.0.0": {},
+      "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore/9.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.DataProtection": "9.0.0",
+          "Microsoft.EntityFrameworkCore": "9.0.0"
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.24.52903"
           }
         }
       },
@@ -87,6 +113,26 @@
         }
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.0": {},
+      "Microsoft.Extensions.Diagnostics.Abstractions/9.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Options": "9.0.0"
+        }
+      },
+      "Microsoft.Extensions.FileProviders.Abstractions/9.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "9.0.0"
+        }
+      },
+      "Microsoft.Extensions.Hosting.Abstractions/9.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "9.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Diagnostics.Abstractions": "9.0.0",
+          "Microsoft.Extensions.FileProviders.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.0"
+        }
+      },
       "Microsoft.Extensions.Logging/9.0.0": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection": "9.0.0",
@@ -303,6 +349,12 @@
           "System.Runtime.Handles": "4.3.0"
         }
       },
+      "System.Security.Cryptography.Pkcs/9.0.0": {},
+      "System.Security.Cryptography.Xml/9.0.0": {
+        "dependencies": {
+          "System.Security.Cryptography.Pkcs": "9.0.0"
+        }
+      },
       "System.Text.Encoding/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
@@ -351,6 +403,34 @@
       "sha512": "sha512-W+U9WvmZQgi5cX6FS5GDtDoPzUCV4LkBLkywq/kRZhuDwcbavOzcDAr3LXJFqHUi952Yj3LEYoWW0jbEUQChsA==",
       "path": "bcrypt.net-next/4.0.3",
       "hashPath": "bcrypt.net-next.4.0.3.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Cryptography.Internal/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-M1dzTEl+2+RqT4vWcqEpWasPXHd58wC93U7QMlmPSmx+qixyVxCQjZ183wr7Wa68b4pF7wC501MU9rdA0ZNhMg==",
+      "path": "microsoft.aspnetcore.cryptography.internal/9.0.0",
+      "hashPath": "microsoft.aspnetcore.cryptography.internal.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.DataProtection/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-mrhTnqMHkaVmaNZOWobg7ior5BELrlC5dC2r3FMVwT0bfOlonOe76B83e3D98Cl/zR5Szhfok2BQmkw6xDvHfg==",
+      "path": "microsoft.aspnetcore.dataprotection/9.0.0",
+      "hashPath": "microsoft.aspnetcore.dataprotection.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.DataProtection.Abstractions/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-o7JVGMXofZ4IuQdyoL0eKC1GnNmviZt2aI7CGHnQjqbz9hIrYim3DUfCKpvKaVzLWfzfgmwaXNg8Zx7fFQaBbA==",
+      "path": "microsoft.aspnetcore.dataprotection.abstractions/9.0.0",
+      "hashPath": "microsoft.aspnetcore.dataprotection.abstractions.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-P2cZiOeu9ovruTHJimojQ7DWG8GRgY31uUpM39grU4iNW2Wd+yheNMj3AViWtyK61U3yMN3KVwUr051Zn8qRFA==",
+      "path": "microsoft.aspnetcore.dataprotection.entityframeworkcore/9.0.0",
+      "hashPath": "microsoft.aspnetcore.dataprotection.entityframeworkcore.9.0.0.nupkg.sha512"
     },
     "Microsoft.EntityFrameworkCore/9.0.0": {
       "type": "package",
@@ -414,6 +494,27 @@
       "sha512": "sha512-+6f2qv2a3dLwd5w6JanPIPs47CxRbnk+ZocMJUhv9NxP88VlOcJYZs9jY+MYSjxvady08bUZn6qgiNh7DadGgg==",
       "path": "microsoft.extensions.dependencyinjection.abstractions/9.0.0",
       "hashPath": "microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Diagnostics.Abstractions/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1K8P7XzuzX8W8pmXcZjcrqS6x5eSSdvhQohmcpgiQNY/HlDAlnrhR9dvlURfFz428A+RTCJpUyB+aKTA6AgVcQ==",
+      "path": "microsoft.extensions.diagnostics.abstractions/9.0.0",
+      "hashPath": "microsoft.extensions.diagnostics.abstractions.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.FileProviders.Abstractions/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-uK439QzYR0q2emLVtYzwyK3x+T5bTY4yWsd/k/ZUS9LR6Sflp8MIdhGXW8kQCd86dQD4tLqvcbLkku8qHY263Q==",
+      "path": "microsoft.extensions.fileproviders.abstractions/9.0.0",
+      "hashPath": "microsoft.extensions.fileproviders.abstractions.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Hosting.Abstractions/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-yUKJgu81ExjvqbNWqZKshBbLntZMbMVz/P7Way2SBx7bMqA08Mfdc9O7hWDKAiSp+zPUGT6LKcSCQIPeDK+CCw==",
+      "path": "microsoft.extensions.hosting.abstractions/9.0.0",
+      "hashPath": "microsoft.extensions.hosting.abstractions.9.0.0.nupkg.sha512"
     },
     "Microsoft.Extensions.Logging/9.0.0": {
       "type": "package",
@@ -603,6 +704,20 @@
       "sha512": "sha512-uv1ynXqiMK8mp1GM3jDqPCFN66eJ5w5XNomaK2XD+TuCroNTLFGeZ+WCmBMcBDyTFKou3P6cR6J/QsaqDp7fGQ==",
       "path": "system.runtime.interopservices/4.3.0",
       "hashPath": "system.runtime.interopservices.4.3.0.nupkg.sha512"
+    },
+    "System.Security.Cryptography.Pkcs/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-8tluJF8w9si+2yoHeL8rgVJS6lKvWomTDC8px65Z8MCzzdME5eaPtEQf4OfVGrAxB5fW93ncucy1+221O9EQaw==",
+      "path": "system.security.cryptography.pkcs/9.0.0",
+      "hashPath": "system.security.cryptography.pkcs.9.0.0.nupkg.sha512"
+    },
+    "System.Security.Cryptography.Xml/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GQZn5wFd+pyOfwWaCbqxG7trQ5ox01oR8kYgWflgtux4HiUNihGEgG2TktRWyH+9bw7NoEju1D41H/upwQeFQw==",
+      "path": "system.security.cryptography.xml/9.0.0",
+      "hashPath": "system.security.cryptography.xml.9.0.0.nupkg.sha512"
     },
     "System.Text.Encoding/4.3.0": {
       "type": "package",

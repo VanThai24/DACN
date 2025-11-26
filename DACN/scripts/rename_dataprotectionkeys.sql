@@ -1,0 +1,1 @@
+RENAME TABLE dataprotectionkeys TO DataProtectionKeys;
