@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
     
     # Database - MySQL connection
-    database_url: str = "mysql+mysqlconnector://root:12345@127.0.0.1:3306/attendance_db"
+    database_url: str = "mysql+mysqlconnector://sql12809465:p2h2gATher@sql12.freesqldatabase.com:3306/sql12809465"
     
     # JWT
     jwt_secret_key: str = "dev-secret-key-please-change"

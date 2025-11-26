@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AdminWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+77dcf393a46c7244f6f1938f057c76273b9f9bf5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b19975ea9ba2dfbeb028a446b31ebfbdaf0961bb")]
 [assembly: System.Reflection.AssemblyProductAttribute("AdminWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AdminWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
