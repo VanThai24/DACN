@@ -2,11 +2,11 @@ import os
 
 # Sử dụng MySQL database giống AdminWeb
 DB_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'database': 'attendance_db',
+    'host': 'ballast.proxy.rlwy.net',
+    'port': 43052,
+    'database': 'railway',
     'user': 'root',
-    'password': '12345'
+    'password': 'UHRSmsuSvwIjYsBRKXfhcRqrnQdJowGs'
 }
 
 def get_db_connection():

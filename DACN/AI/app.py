@@ -44,10 +44,11 @@ print(f"✓ Classes: {metadata['classes']}")
 # Database connection
 def get_db():
     return mysql.connector.connect(
-        host="localhost",
+        host="ballast.proxy.rlwy.net",
         user="root",
-        password="12345",
-        database="attendance_db"
+        password="UHRSmsuSvwIjYsBRKXfhcRqrnQdJowGs",
+        database="railway",
+        port=43052
     )
 
 def extract_embedding(img_bytes):
