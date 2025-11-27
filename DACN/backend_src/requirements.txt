@@ -27,3 +27,4 @@ pytest-cov
 bleach
 cryptography
 pymysql
+email-validator
