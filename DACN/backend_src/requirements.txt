@@ -28,3 +28,4 @@ bleach
 cryptography
 pymysql
 email-validator
+face_recognition
