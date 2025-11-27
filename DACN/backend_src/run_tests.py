@@ -14,9 +14,9 @@ def run_tests():
     
     cmd = [
         "pytest",
-        "tests/",
+        "backend_src/tests/",
         "-v",
-        "--cov=app",
+        "--cov=backend_src/app",
         "--cov-report=html",
         "--cov-report=term-missing",
         "--tb=short"

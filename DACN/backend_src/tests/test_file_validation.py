@@ -6,6 +6,7 @@ from fastapi import UploadFile, HTTPException
 from app.validators import FileValidator, validate_face_image
 from io import BytesIO
 from PIL import Image
+from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -16,11 +17,11 @@ def valid_image_file():
     img.save(img_bytes, format='JPEG')
     img_bytes.seek(0)
     
-    return UploadFile(
-        filename="test.jpg",
-        file=img_bytes,
-        content_type="image/jpeg"
-    )
+    upload = MagicMock(spec=UploadFile)
+    upload.filename = "test.jpg"
+    upload.file = img_bytes
+    upload.content_type = "image/jpeg"
+    return upload
 
 
 @pytest.fixture
@@ -31,11 +32,11 @@ def small_image_file():
     img.save(img_bytes, format='JPEG')
     img_bytes.seek(0)
     
-    return UploadFile(
-        filename="small.jpg",
-        file=img_bytes,
-        content_type="image/jpeg"
-    )
+    upload = MagicMock(spec=UploadFile)
+    upload.filename = "small.jpg"
+    upload.file = img_bytes
+    upload.content_type = "image/jpeg"
+    return upload
 
 
 @pytest.fixture
@@ -46,11 +47,11 @@ def large_image_file():
     img.save(img_bytes, format='JPEG')
     img_bytes.seek(0)
     
-    return UploadFile(
-        filename="large.jpg",
-        file=img_bytes,
-        content_type="image/jpeg"
-    )
+    upload = MagicMock(spec=UploadFile)
+    upload.filename = "large.jpg"
+    upload.file = img_bytes
+    upload.content_type = "image/jpeg"
+    return upload
 
 
 class TestFileValidator:
@@ -77,11 +78,10 @@ class TestFileValidator:
     
     def test_invalid_file_extension(self):
         """Test validation fails for invalid extension"""
-        invalid_file = UploadFile(
-            filename="test.txt",
-            file=BytesIO(b"not an image"),
-            content_type="text/plain"
-        )
+        invalid_file = MagicMock(spec=UploadFile)
+        invalid_file.filename = "test.txt"
+        invalid_file.file = BytesIO(b"not an image")
+        invalid_file.content_type = "text/plain"
         with pytest.raises(HTTPException) as exc_info:
             FileValidator.validate_image(invalid_file)
         assert exc_info.value.status_code == 400
@@ -89,11 +89,10 @@ class TestFileValidator:
     
     def test_empty_file(self):
         """Test validation fails for empty file"""
-        empty_file = UploadFile(
-            filename="empty.jpg",
-            file=BytesIO(b""),
-            content_type="image/jpeg"
-        )
+        empty_file = MagicMock(spec=UploadFile)
+        empty_file.filename = "empty.jpg"
+        empty_file.file = BytesIO(b"")
+        empty_file.content_type = "image/jpeg"
         with pytest.raises(HTTPException) as exc_info:
             FileValidator.validate_image(empty_file)
         assert exc_info.value.status_code == 400
@@ -130,11 +129,10 @@ class TestFileValidator:
     
     def test_invalid_content_type(self):
         """Test invalid content type rejection"""
-        invalid_file = UploadFile(
-            filename="test.jpg",
-            file=BytesIO(b"data"),
-            content_type="application/pdf"
-        )
+        invalid_file = MagicMock(spec=UploadFile)
+        invalid_file.filename = "test.jpg"
+        invalid_file.file = BytesIO(b"data")
+        invalid_file.content_type = "application/pdf"
         with pytest.raises(HTTPException) as exc_info:
             FileValidator.validate_file_content_type(
                 invalid_file,

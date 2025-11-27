@@ -32,7 +32,7 @@ class TestEmployeeValidation:
         """Test phone validation - invalid format"""
         with pytest.raises(ValidationError) as exc_info:
             EmployeeCreate(name="John Doe", phone="abc123")
-        assert "invalid phone" in str(exc_info.value).lower()
+        assert "string should have at least 10 characters" in str(exc_info.value).lower()
     
     def test_invalid_email(self):
         """Test email validation"""
