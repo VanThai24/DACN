@@ -152,9 +152,12 @@ def login(request_data: LoginRequest, request: Request, db: Session = Depends(ge
             if photo_path:
                 # Nếu photo_path đã có dấu / ở đầu thì giữ nguyên, nếu chỉ là tên file thì thêm /photos/
                 if photo_path.startswith("/"):
-                    avatar = photo_path
+                    avatar_path = photo_path
                 else:
-                    avatar = f"/photos/{photo_path}"
+                    avatar_path = f"/photos/{photo_path}"
+                # Tạo link đầy đủ cho avatar
+                base_url = str(request.base_url).rstrip('/')
+                avatar = f"{base_url}{avatar_path}"
         
         logger.info(f"Login success - User: {user.username}, Employee ID: {user.employee_id}, Avatar: {avatar}")
         return LoginResponse(
