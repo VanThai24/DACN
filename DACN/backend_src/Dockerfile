@@ -1,51 +1,10 @@
-# Python base image
-FROM python:3.11-slim
+# Dockerfile for Python FastAPI backend
+FROM python:3.11
 
-# Set working directory
-WORKDIR /app
+WORKDIR /backend_src
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    build-essential \
-    cmake \
-    libboost-all-dev \
-    libopenblas-dev \
-    liblapack-dev \
-    libx11-dev \
-    libgtk-3-dev \
-    libjpeg-dev \
-    libpng-dev \
-    libtiff-dev \
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
-    libpq-dev \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
+COPY ./backend_src /backend_src
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY wwwroot/photos /app/wwwroot/photos
-
-# Create logs directory
-RUN mkdir -p logs
-
-# Expose port
-EXPOSE 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
-
-# Run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
