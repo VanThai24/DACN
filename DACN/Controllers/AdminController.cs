@@ -64,6 +64,41 @@ namespace Controllers
             }).ToList();
             
             ViewBag.DailyAttendance = dailyAttendance;
+
+            // Thống kê điểm danh theo tháng (12 tháng gần nhất)
+            var last12Months = Enumerable.Range(0, 12)
+                .Select(i => today.AddMonths(-i))
+                .Reverse()
+                .ToList();
+            
+            var monthlyAttendance = last12Months.Select(date => new {
+                Month = date.ToString("MM/yyyy"),
+                Count = _context.AttendanceRecords
+                    .Count(r => r.TimestampIn.HasValue && 
+                               r.TimestampIn.Value.Year == date.Year && 
+                               r.TimestampIn.Value.Month == date.Month)
+            }).ToList();
+            
+            ViewBag.MonthlyAttendance = monthlyAttendance;
+
+            // Thống kê điểm danh tháng hiện tại theo ngày
+            var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+            var daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);
+            
+            var currentMonthDailyAttendance = Enumerable.Range(1, daysInMonth)
+                .Select(day => {
+                    var date = new DateTime(today.Year, today.Month, day);
+                    return new {
+                        Date = date.ToString("dd/MM"),
+                        Day = day,
+                        Count = _context.AttendanceRecords
+                            .Count(r => r.TimestampIn.HasValue && r.TimestampIn.Value.Date == date)
+                    };
+                })
+                .ToList();
+            
+            ViewBag.CurrentMonthDailyAttendance = currentMonthDailyAttendance;
+            ViewBag.CurrentMonth = today.ToString("MMMM yyyy");
             
             return View();
         }

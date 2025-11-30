@@ -62,7 +62,7 @@
 
 <div class="row g-3">
     <!-- Biểu đồ điểm danh 7 ngày -->
-    <div class="col-xl-8 col-lg-7">
+    <div class="col-xl-6 col-lg-6">
         <div class="card">
             <div class="card-header">
                 <div class="d-flex align-items-center">
@@ -81,12 +81,54 @@
         </div>
     </div>
 
-    <!-- Thống kê theo phòng ban -->
-    <div class="col-xl-4 col-lg-5">
+    <!-- Biểu đồ điểm danh theo tháng -->
+    <div class="col-xl-6 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="icon-container icon-purple me-3">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Thống kê 12 tháng gần nhất</h5>
+                        <small class="text-gray-500">Xu hướng dài hạn</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" style="height: 350px;">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Biểu đồ điểm danh tháng hiện tại -->
+<div class="row mt-3">
+    <div class="col-xl-8">
         <div class="card">
             <div class="card-header">
                 <div class="d-flex align-items-center">
                     <div class="icon-container icon-green me-3">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Điểm danh tháng @ViewBag.CurrentMonth</h5>
+                        <small class="text-gray-500">Chi tiết theo từng ngày trong tháng</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" style="height: 400px;">
+                <canvas id="currentMonthChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê theo phòng ban -->
+    <div class="col-xl-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="icon-container icon-yellow me-3">
                         <i class="bi bi-pie-chart-fill"></i>
                     </div>
                     <div>
@@ -95,7 +137,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body" style="height: 350px;">
+            <div class="card-body" style="height: 400px;">
                 <canvas id="departmentChart"></canvas>
             </div>
         </div>
@@ -309,6 +351,154 @@ document.addEventListener('DOMContentLoaded', function() {
                             let percentage = ((value / total) * 100).toFixed(1);
                             return `${label}: ${value} (${percentage}%)`;
                         }
+                    }
+                }
+            }
+        }
+    });
+
+    // Biểu đồ điểm danh 12 tháng
+    var monthlyData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MonthlyAttendance));
+    var monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    
+    var gradientBar = monthlyCtx.createLinearGradient(0, 0, 0, 300);
+    gradientBar.addColorStop(0, 'rgba(118, 75, 162, 0.8)');
+    gradientBar.addColorStop(1, 'rgba(118, 75, 162, 0.3)');
+    
+    var monthlyChart = new Chart(monthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: monthlyData.map(d => d.Month),
+            datasets: [{
+                label: 'Tổng lượt điểm danh',
+                data: monthlyData.map(d => d.Count),
+                backgroundColor: gradientBar,
+                borderColor: 'rgba(118, 75, 162, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        padding: 20,
+                        font: { size: 12, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: { size: 11 },
+                        padding: 10
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: { size: 10, weight: '600' },
+                        padding: 10,
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+
+    // Biểu đồ điểm danh tháng hiện tại
+    var currentMonthData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.CurrentMonthDailyAttendance));
+    var currentMonthCtx = document.getElementById('currentMonthChart').getContext('2d');
+    
+    var gradientGreen = currentMonthCtx.createLinearGradient(0, 0, 0, 350);
+    gradientGreen.addColorStop(0, 'rgba(17, 153, 142, 0.8)');
+    gradientGreen.addColorStop(1, 'rgba(17, 153, 142, 0.2)');
+    
+    var currentMonthChart = new Chart(currentMonthCtx, {
+        type: 'bar',
+        data: {
+            labels: currentMonthData.map(d => d.Date),
+            datasets: [{
+                label: 'Lượt điểm danh',
+                data: currentMonthData.map(d => d.Count),
+                backgroundColor: gradientGreen,
+                borderColor: 'rgba(17, 153, 142, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        padding: 20,
+                        font: { size: 12, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    cornerRadius: 8,
+                    callbacks: {
+                        title: function(context) {
+                            return 'Ngày ' + context[0].label;
+                        },
+                        label: function(context) {
+                            return 'Điểm danh: ' + context.parsed.y + ' lượt';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        font: { size: 11 },
+                        padding: 10,
+                        stepSize: 5
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: { size: 9, weight: '600' },
+                        padding: 8,
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 15
                     }
                 }
             }

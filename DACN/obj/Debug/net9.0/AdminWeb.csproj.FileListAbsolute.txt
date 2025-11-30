@@ -252,3 +252,4 @@ d:\DACN\DACN\obj\Debug\net9.0\refint\AdminWeb.dll
 d:\DACN\DACN\obj\Debug\net9.0\AdminWeb.pdb
 d:\DACN\DACN\obj\Debug\net9.0\AdminWeb.genruntimeconfig.cache
 d:\DACN\DACN\obj\Debug\net9.0\ref\AdminWeb.dll
+D:\DACN\DACN\bin\Debug\net9.0\htmlcov\status.json
