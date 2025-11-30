@@ -9,6 +9,7 @@ import cv2
 import mysql.connector
 from anti_spoofing import AntiSpoofing
 from mask_detection import MaskDetector
+from config import get_db_config
 
 class FaceIDApp(QWidget):
     def get_jwt_token(self, username, password):
@@ -241,12 +242,8 @@ class FaceIDApp(QWidget):
         # 🚀 OPTIMIZATION: Cache employee data (chỉ load 1 lần)
         if self.employee_cache is None:
             # Lấy embeddings từ database
-            db = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="12345",
-                database="attendance_db"
-            )
+            db_config = get_db_config()
+            db = mysql.connector.connect(**db_config)
             cursor = db.cursor()
             # 🔥 EMBEDDING MATCHING: Lấy tất cả nhân viên có embedding
             cursor.execute("""
@@ -263,13 +260,28 @@ class FaceIDApp(QWidget):
             employee_data = []
             for emp_id, name, encoding_blob in employees_db:
                 if encoding_blob:
-                    # Blob là bytes, convert về numpy array
-                    encoding = np.frombuffer(encoding_blob, dtype=np.float32)
-                    employee_data.append({
-                        'id': emp_id,
-                        'name': name,
-                        'embedding': encoding
-                    })
+                    try:
+                        # Try to parse as JSON string first (Railway/Cloud format)
+                        import json
+                        if isinstance(encoding_blob, str):
+                            encoding = np.array(json.loads(encoding_blob), dtype=np.float32)
+                        elif isinstance(encoding_blob, bytes):
+                            # Try JSON from bytes
+                            try:
+                                encoding = np.array(json.loads(encoding_blob.decode('utf-8')), dtype=np.float32)
+                            except:
+                                # Fallback to binary blob (Local format)
+                                encoding = np.frombuffer(encoding_blob, dtype=np.float32)
+                        else:
+                            continue
+                        
+                        employee_data.append({
+                            'id': emp_id,
+                            'name': name,
+                            'embedding': encoding
+                        })
+                    except Exception as e:
+                        print(f"⚠️ Failed to parse embedding for {name} (ID: {emp_id}): {e}")
             
             self.employee_cache = employee_data
             print(f"✅ Loaded {len(employee_data)} employees with embeddings (CACHED)")
@@ -527,12 +539,8 @@ class FaceIDApp(QWidget):
                             if emp_match:
                                 # Lưu attendance vào DB
                                 try:
-                                    db2 = mysql.connector.connect(
-                                        host="localhost",
-                                        user="root",
-                                        password="12345",
-                                        database="attendance_db"
-                                    )
+                                    db_config = get_db_config()
+                                    db2 = mysql.connector.connect(**db_config)
                                     cursor2 = db2.cursor()
                                     
                                     from datetime import datetime, time
