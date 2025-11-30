@@ -8,19 +8,49 @@
 
 <!-- Biểu đồ thống kê điểm danh -->
 <div class="row justify-content-center mt-4">
-    <div class="col-md-12">
+    <!-- Biểu đồ trạng thái hôm nay -->
+    <div class="col-md-4">
         <div class="card shadow mb-4">
             <div class="card-header bg-info text-white">
-                <h4 class="mb-0"><i class="bi bi-bar-chart"></i> Thống kê điểm danh</h4>
+                <h5 class="mb-0"><i class="bi bi-pie-chart-fill"></i> Trạng thái hôm nay</h5>
             </div>
             <div class="card-body">
                 <div style="min-height:220px;display:flex;align-items:center;justify-content:center;">
-                        <div style="display: flex; justify-content: center; align-items: center; height: 260px; margin-top: 0;">
-                            <canvas id="attendanceChart" width="220" height="220" style="margin: 0 auto;"></canvas>
-                        </div>
+                    <div style="display: flex; justify-content: center; align-items: center; height: 260px; margin-top: 0;">
+                        <canvas id="attendanceChart" width="220" height="220" style="margin: 0 auto;"></canvas>
+                    </div>
                 </div>
-                <div id="attendanceChartEmpty" class="text-center text-muted" style="display:none;">Không có dữ liệu để hiển thị biểu đồ.</div>
+                <div id="attendanceChartEmpty" class="text-center text-muted" style="display:none;">
+                    <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="mt-2">Không có dữ liệu điểm danh</p>
+                </div>
                 <div id="attendanceSummary" style="margin-top:12px;display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ 7 ngày -->
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Xu hướng 7 ngày gần đây</h5>
+            </div>
+            <div class="card-body" style="height: 360px;">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Biểu đồ tháng hiện tại -->
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar3"></i> Điểm danh tháng @DateTime.Now.ToString("MM/yyyy")</h5>
+            </div>
+            <div class="card-body" style="height: 350px;">
+                <canvas id="monthlyChart"></canvas>
             </div>
         </div>
     </div>
@@ -40,52 +70,193 @@
             } else {
                 return;
             }
-            // Chỉ lấy trạng thái Có mặt và Đi muộn
-            let present = 0, late = 0;
+            // Lấy tất cả trạng thái
+            let present = 0, late = 0, absent = 0;
             data.forEach(x => {
                 const s = (x.status ?? x.Status ?? 'unknown');
                 if (s === "present") present = Number(x.count ?? x.Count ?? 0);
                 if (s === "late") late = Number(x.count ?? x.Count ?? 0);
+                if (s === "absent") absent = Number(x.count ?? x.Count ?? 0);
             });
-            const labels = ["Có mặt", "Đi muộn"];
-            const counts = [present, late];
-            const colors = ["#28a745", "#ffc107"];
-            document.getElementById('attendanceChartEmpty').style.display = (present + late === 0 ? 'block' : 'none');
-            document.getElementById('attendanceChart').style.display = (present + late > 0 ? 'block' : 'none');
-            document.getElementById('attendanceSummary').style.display = 'block';
-            // Render summary badges
-            const summary = document.getElementById('attendanceSummary');
-            summary.innerHTML = labels.map((l,i) => counts[i] > 0 ? `<span style="display:inline-block;margin-right:8px;padding:6px 10px;border-radius:14px;background:${colors[i]};color:#fff;font-weight:700;">${l}: ${counts[i]}</span>` : '').join('');
-            // Vẽ pie chart
-            if (present + late > 0) {
+            
+            const totalRecords = present + late + absent;
+            const hasData = totalRecords > 0;
+            
+            document.getElementById('attendanceChartEmpty').style.display = hasData ? 'none' : 'block';
+            document.getElementById('attendanceChart').style.display = hasData ? 'block' : 'none';
+            document.getElementById('attendanceSummary').style.display = hasData ? 'block' : 'none';
+            
+            if (hasData) {
+                const labels = ["Có mặt", "Đi muộn", "Vắng"];
+                const counts = [present, late, absent];
+                const colors = ["#28a745", "#ffc107", "#dc3545"];
+                
+                // Render summary badges
+                const summary = document.getElementById('attendanceSummary');
+                summary.innerHTML = labels.map((l,i) => counts[i] > 0 ? 
+                    `<span style="display:inline-block;margin-right:8px;padding:6px 10px;border-radius:14px;background:${colors[i]};color:#fff;font-weight:700;">${l}: ${counts[i]}</span>` 
+                    : '').join('');
+                
+                // Vẽ pie chart
                 const ctx = document.getElementById('attendanceChart').getContext('2d');
                 if(window.attendanceChart && typeof window.attendanceChart.destroy === 'function') {
                     window.attendanceChart.destroy();
                 }
                 window.attendanceChart = new Chart(ctx, {
-                    type: 'pie',
+                    type: 'doughnut',
                     data: {
                         labels: labels,
                         datasets: [{
                             data: counts,
                             backgroundColor: colors,
+                            borderWidth: 3,
+                            borderColor: '#fff'
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
                         plugins: {
-                            legend: { display: true },
-                            title: { display: false }
+                            legend: { 
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: { size: 12, weight: '600' }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                cornerRadius: 8
+                            }
                         }
                     }
                 });
             }
         } catch (err) {
+            console.error('Error loading attendance stats:', err);
             document.getElementById('attendanceChart').style.display = 'none';
             document.getElementById('attendanceChartEmpty').style.display = 'block';
         }
     }
+
+    async function loadWeeklyStats() {
+        try {
+            const res = await fetch('@Url.Action("AttendanceWeeklyStats", "Attendance")', { credentials: 'same-origin' });
+            const data = await res.json();
+            
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(54, 162, 235, 0.3)');
+            gradient.addColorStop(1, 'rgba(54, 162, 235, 0.05)');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: 'Lượt điểm danh',
+                        data: data.map(d => d.count),
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('Error loading weekly stats:', err);
+        }
+    }
+
+    async function loadMonthlyStats() {
+        try {
+            const res = await fetch('@Url.Action("AttendanceMonthlyStats", "Attendance")', { credentials: 'same-origin' });
+            const data = await res.json();
+            
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
+            gradient.addColorStop(1, 'rgba(75, 192, 192, 0.2)');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: 'Lượt điểm danh',
+                        data: data.map(d => d.count),
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 15
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('Error loading monthly stats:', err);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         loadAttendanceStats();
+        loadWeeklyStats();
+        loadMonthlyStats();
+        
         document.querySelector('form').addEventListener('submit', function(e) {
             setTimeout(loadAttendanceStats, 500);
         });
